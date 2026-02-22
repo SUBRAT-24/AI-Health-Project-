@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Back to Home</a></li>
+                <li><a href="login.html">User Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-container" style="max-width: 400px; margin: 3rem auto; padding: 0 2rem;">
+        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #00796b; margin-bottom: 0.5rem;">Admin Login</h2>
+            <p style="text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 2rem;">Administrators only</p>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="admin@healthassistant.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div id="adminLoginError" style="color: #f44336; font-size: 0.9rem; margin-bottom: 1rem; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Admin Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 1.5rem;">
+                <a href="login.html" style="color: #00796b;">User Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('adminLoginError');
+            errEl.style.display = 'none';
+            errEl.textContent = '';
+
+            try {
+                const response = await window.healthAssistant.apiRequest('/auth/login', 'POST', { email, password });
+                if (response.role !== 'admin') {
+                    errEl.textContent = 'Admin access required. Use admin credentials.';
+                    errEl.style.display = 'block';
+                    if (response.token) {
+                        localStorage.removeItem('userToken');
+                        localStorage.removeItem('userData');
+                        localStorage.removeItem('userName');
+                    }
+                    return;
+                }
+                localStorage.setItem('userToken', response.token);
+                localStorage.setItem('userName', response.name);
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('userData', JSON.stringify({
+                    user_id: response.user_id,
+                    name: response.name,
+                    email: response.email,
+                    role: 'admin'
+                }));
+                window.healthAssistant.showToast('Admin login successful', 'success');
+                window.location.href = 'admin-dashboard.html';
+            } catch (err) {
+                errEl.textContent = err.message || 'Login failed';
+                errEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

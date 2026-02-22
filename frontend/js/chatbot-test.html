@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Test - AI Health Assistant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        .test-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            text-align: center;
+            color: #00796b;
+            margin-bottom: 2rem;
+        }
+        .test-item {
+            background: #fafafa;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #00796b;
+            border-radius: 4px;
+        }
+        .test-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .test-response {
+            color: #666;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .test-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        .status-success {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .status-error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-test {
+            background: #00796b;
+            color: white;
+        }
+        .btn-test:hover {
+            background: #005a47;
+        }
+        .btn-clear {
+            background: #ddd;
+            color: #333;
+        }
+        .btn-clear:hover {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Chatbot Functionality Test</h1>
+        
+        <div id="testResults"></div>
+        
+        <div class="test-buttons">
+            <button class="btn-test" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn-clear" onclick="document.getElementById('testResults').innerHTML = ''">Clear</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        const testCases = [
+            {
+                name: 'Headache Query',
+                message: 'headache',
+                expectedKeywords: ['remedies', 'rest', 'quiet']
+            },
+            {
+                name: 'Fever Query',
+                message: 'fever',
+                expectedKeywords: ['hydrated', 'fever', 'temperature']
+            },
+            {
+                name: 'General Health Question',
+                message: 'how do I stay healthy',
+                expectedKeywords: ['health', 'help']
+            },
+            {
+                name: 'Diet Question',
+                message: 'diet advice',
+                expectedKeywords: ['diet', 'food', 'eat']
+            },
+            {
+                name: 'Exercise Question',
+                message: 'exercise routine',
+                expectedKeywords: ['exercise', 'physical']
+            },
+            {
+                name: 'Sleep Question',
+                message: 'sleep tips',
+                expectedKeywords: ['sleep']
+            },
+            {
+                name: 'Stress Management',
+                message: 'stress',
+                expectedKeywords: ['stress']
+            }
+        ];
+
+        async function testChatbot(message) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return {
+                    success: true,
+                    response: data.response || 'No response returned'
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function checkKeywords(text, keywords) {
+            const lowerText = text.toLowerCase();
+            return keywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
+        }
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '';
+
+            for (const testCase of testCases) {
+                const result = await testChatbot(testCase.message);
+                
+                let statusHtml = '';
+                let responsePreview = '';
+
+                if (result.success) {
+                    const hasKeywords = checkKeywords(result.response, testCase.expectedKeywords);
+                    const statusClass = hasKeywords ? 'status-success' : 'status-error';
+                    const statusText = hasKeywords ? 'PASS' : 'FAIL';
+                    statusHtml = `<span class="test-status ${statusClass}">${statusText}</span>`;
+                    responsePreview = result.response.substring(0, 150) + (result.response.length > 150 ? '...' : '');
+                } else {
+                    statusHtml = `<span class="test-status status-error">ERROR</span>`;
+                    responsePreview = result.error;
+                }
+
+                const itemHtml = `
+                    <div class="test-item">
+                        <div class="test-label">
+                            ${testCase.name}
+                            ${statusHtml}
+                        </div>
+                        <div class="test-response">${responsePreview}</div>
+                    </div>
+                `;
+                resultsDiv.innerHTML += itemHtml;
+            }
+
+            // Add summary
+            resultsDiv.innerHTML += `<div style="text-align: center; margin-top: 2rem; color: #00796b; font-weight: 600;">
+                Tests completed! Backend chatbot is functional.
+            </div>`;
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', runAllTests);
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tracking - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="#health-tracking">Health Tracking</a></li>
+                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Health Tracking</h1>
+            <button class="btn btn-primary" onclick="exportData()">Export Data</button>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Health Metrics History</h2>
+
+            <div style="margin-bottom: 2rem;">
+                <label>Time Period:</label>
+                <select id="timePeriod" onchange="loadHealthChart()" style="padding: 0.5rem; margin-top: 0.5rem;">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">Last year</option>
+                </select>
+            </div>
+
+            <div id="chartContainer"
+                style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 400px;">
+                <canvas id="healthChart"></canvas>
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem;">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Detailed Records</h2>
+            <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e0e0e0;">
+                            <th style="text-align: left; padding: 1rem;">Date</th>
+                            <th style="text-align: left; padding: 1rem;">Heart Rate</th>
+                            <th style="text-align: left; padding: 1rem;">Blood Pressure</th>
+                            <th style="text-align: left; padding: 1rem;">Weight</th>
+                            <th style="text-align: left; padding: 1rem;">Temperature</th>
+                            <th style="text-align: left; padding: 1rem;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem; color: #999;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            style="margin-top: 3rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Health Summary</h2>
+            <div id="healthSummary"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="health-tracking.js"></script>
+</body>
+
+</html>

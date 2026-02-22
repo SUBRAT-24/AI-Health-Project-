@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: health_assistant_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: health_assistant
+      MYSQL_USER: healthuser
+      MYSQL_PASSWORD: healthpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - health_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: health_assistant_cache
+    ports:
+      - "6379:6379"
+    networks:
+      - health_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 5
+
+  # Flask Backend
+  flask_app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: health_assistant_flask
+    environment:
+      FLASK_ENV: development
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+    networks:
+      - health_network
+    command: python backend/flask_app/__init__.py
+
+  # FastAPI Backend
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: health_assistant_fastapi
+    environment:
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+    networks:
+      - health_network
+    command: uvicorn backend.fastapi_app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: health_assistant_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - flask_app
+      - fastapi_app
+    networks:
+      - health_network
+
+  # Frontend
+  frontend:
+    image: node:16-alpine
+    container_name: health_assistant_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "8080:3000"
+    command: npm install && npm start
+    networks:
+      - health_network
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+
+volumes:
+  mysql_data:
+
+networks:
+  health_network:
+    driver: bridge

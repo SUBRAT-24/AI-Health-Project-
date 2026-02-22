@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Plans - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+                <li><a href="health-tracking.html">Health</a></li>
+                <li><a href="diet-suggestions.html">Diet</a></li>
+                <li><a href="#exercise">Exercise</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🏃 Exercise Plans</h1>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Get Exercise Recommendations</h2>
+                <form id="exerciseForm">
+                    <div class="form-group">
+                        <label for="fitnessLevel">Fitness Level</label>
+                        <select id="fitnessLevel" required>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Get Recommendations</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="exerciseResults" style="margin-top: 2rem; display: none;">
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Your Exercise Plan</h2>
+                <div id="exerciseContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.healthAssistant || !window.healthAssistant.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+        document.getElementById('exerciseForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const level = document.getElementById('fitnessLevel').value;
+
+            try {
+                const result = await window.healthAssistant.getExerciseRecommendations(level);
+                if (result) {
+                    let html = '';
+                    if (result.daily_recommendation && result.daily_recommendation.length) {
+                        html += '<h4 style="color: #00796b;">Daily Plan</h4><ul style="list-style: none; padding: 0;">';
+                        result.daily_recommendation.forEach(ex => {
+                            const name = ex.exercise || ex;
+                            const duration = ex.duration ? ` (${ex.duration} min)` : '';
+                            html += `<li style="padding: 0.5rem 0;">💪 ${name}${duration} - ${ex.description || ''}</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    if (result.weekly_plan && result.weekly_plan.length) {
+                        html += '<h4 style="color: #00796b; margin-top: 1rem;">Weekly Plan</h4><ul style="list-style: none; padding: 0;">';
+                        result.weekly_plan.forEach(day => html += `<li style="padding: 0.3rem 0;">📅 ${day}</li>`);
+                        html += '</ul>';
+                    }
+                    if (result.tips && result.tips.length) {
+                        html += '<h4 style="color: #00796b; margin-top: 1rem;">Tips</h4><ul style="list-style: none; padding: 0;">';
+                        result.tips.forEach(t => html += `<li style="padding: 0.3rem 0;">✓ ${t}</li>`);
+                        html += '</ul>';
+                    }
+                    document.getElementById('exerciseContent').innerHTML = html || '<p>No recommendations available.</p>';
+                    document.getElementById('exerciseResults').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error getting exercise recommendations:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

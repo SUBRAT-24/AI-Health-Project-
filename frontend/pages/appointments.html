@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="#appointments">Appointments</a></li>
+                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>My Appointments</h1>
+            <button class="btn btn-primary" onclick="openBookModal()">Book New Appointment</button>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Your Appointments</h2>
+            <div id="appointmentsList"
+                style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e0e0e0;">
+                            <th style="text-align: left; padding: 1rem;">Doctor</th>
+                            <th style="text-align: left; padding: 1rem;">Specialization</th>
+                            <th style="text-align: left; padding: 1rem;">Date & Time</th>
+                            <th style="text-align: left; padding: 1rem;">Status</th>
+                            <th style="text-align: left; padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Appointment Modal -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBookModal()">&times;</span>
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Book Appointment</h2>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="doctorName">Doctor Name</label>
+                    <input type="text" id="doctorName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialization">Specialization</label>
+                    <select id="specialization" required>
+                        <option value="">Select Specialization</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="General Practitioner">General Practitioner</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentDate">Appointment Date & Time</label>
+                    <input type="datetime-local" id="appointmentDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Reason for Visit</label>
+                    <textarea id="reason" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Book Appointment</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="appointments.js"></script>
+</body>
+
+</html>

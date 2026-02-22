@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+                <li><a href="health-tracking.html">Health</a></li>
+                <li><a href="diet-suggestions.html">Diet</a></li>
+                <li><a href="exercise.html">Exercise</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>Welcome, <span id="userName"></span>!</h1>
+                <p>Your Personal Health Dashboard</p>
+            </div>
+            <button class="btn btn-primary" onclick="openHealthModal()">Add Health Data</button>
+        </div>
+
+        <div class="health-status">
+            <div class="status-card">
+                <h3>💓 Heart Rate</h3>
+                <div class="status-value" id="heartRate">-- bpm</div>
+                <p style="color: #999; font-size: 0.9rem;">Last updated: <span id="heartRateTime">--</span></p>
+            </div>
+
+            <div class="status-card">
+                <h3>🧊 Blood Pressure</h3>
+                <div class="status-value" id="bloodPressure">-- mmHg</div>
+                <p style="color: #999; font-size: 0.9rem;">Last updated: <span id="bpTime">--</span></p>
+            </div>
+
+            <div class="status-card">
+                <h3>⚖️ Weight</h3>
+                <div class="status-value" id="weight">-- kg</div>
+                <p style="color: #999; font-size: 0.9rem;">Last updated: <span id="weightTime">--</span></p>
+            </div>
+
+            <div class="status-card">
+                <h3>📊 BMI</h3>
+                <div class="status-value" id="bmi">-- </div>
+                <p style="color: #999; font-size: 0.9rem;">Body Mass Index</p>
+            </div>
+        </div>
+
+        <section style="margin-top: 3rem;">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Health Insights</h2>
+            <div id="healthInsights"
+                style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <p>Loading health insights...</p>
+            </div>
+        </section>
+
+        <section style="margin-top: 3rem;">
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Recent Activity</h2>
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e0e0e0;">
+                            <th style="text-align: left; padding: 1rem;">Date</th>
+                            <th style="text-align: left; padding: 1rem;">Activity</th>
+                            <th style="text-align: left; padding: 1rem;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentActivity">
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 2rem; color: #999;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Health Data Modal -->
+    <div id="healthModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHealthModal()">&times;</span>
+            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Add Health Data</h2>
+            <form id="healthForm">
+                <div class="form-group">
+                    <label for="heartRateInput">Heart Rate (bpm)</label>
+                    <input type="number" id="heartRateInput" min="0" required placeholder="e.g. 72">
+                </div>
+
+                <div class="form-group">
+                    <label for="systolic">Blood Pressure - Systolic</label>
+                    <input type="number" id="systolic" min="0" required placeholder="e.g. 120">
+                </div>
+
+                <div class="form-group">
+                    <label for="diastolic">Blood Pressure - Diastolic</label>
+                    <input type="number" id="diastolic" min="0" required placeholder="e.g. 80">
+                </div>
+
+                <div class="form-group">
+                    <label for="weightInput">Weight (kg)</label>
+                    <input type="number" id="weightInput" min="0" step="0.1" required placeholder="e.g. 70.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">Temperature (°C)</label>
+                    <input type="number" id="temperature" min="30" step="0.1" required placeholder="e.g. 36.6">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Any additional notes..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div id="chatbot-container" class="chatbot-container" style="display: none;">
+        <div class="chatbot-header">
+            <h3>Health Assistant</h3>
+            <button class="chatbot-close" onclick="toggleChatbot()"
+                style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px;">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages"></div>
+        <div class="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Ask me anything health-related..." autocomplete="off">
+            <button id="chatSendBtn" class="chat-send-btn">Send</button>
+        </div>
+    </div>
+
+    <button id="chatbot-toggle" class="chatbot-toggle">Chat</button>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/chatbot.js"></script>
+</body>
+
+</html>

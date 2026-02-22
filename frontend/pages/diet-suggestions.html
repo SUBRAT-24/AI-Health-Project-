@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Suggestions - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 AI Health Assistant</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+                <li><a href="health-tracking.html">Health</a></li>
+                <li><a href="#diet">Diet</a></li>
+                <li><a href="exercise.html">Exercise</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🥗 Diet Suggestions</h1>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Get Personalized Diet Recommendations</h2>
+                <form id="dietForm">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" required placeholder="e.g. 25" min="1" max="120">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="condition">Health Condition</label>
+                        <select id="condition" required>
+                            <option value="normal">Normal / Healthy</option>
+                            <option value="diabetes">Diabetes</option>
+                            <option value="hypertension">Hypertension</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Get Recommendations</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dietResults" style="margin-top: 2rem; display: none;">
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Your Diet Recommendations</h2>
+                <div id="dietContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.healthAssistant || !window.healthAssistant.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+        document.getElementById('dietForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const condition = document.getElementById('condition').value;
+
+            try {
+                const result = await window.healthAssistant.getDietRecommendations(age, gender, condition);
+                if (result) {
+                    let html = '';
+                    const rec = result.recommendations || result;
+                    if (typeof rec === 'object' && !Array.isArray(rec)) {
+                        ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(meal => {
+                            const items = rec[meal];
+                            if (items && items.length) {
+                                html += `<h4 style="color: #00796b; margin: 1rem 0 0.5rem;">${meal.charAt(0).toUpperCase() + meal.slice(1)}</h4><ul style="list-style: none; padding: 0;">`;
+                                items.forEach(m => {
+                                    const name = m.name || m;
+                                    const desc = m.description ? ` - ${m.description}` : '';
+                                    html += `<li style="padding: 0.5rem 0;">✅ ${name}${desc}</li>`;
+                                });
+                                html += '</ul>';
+                            }
+                        });
+                        if (rec.daily_goals) {
+                            html += `<p style="margin-top: 1rem; color: #666;">Daily goals: Calories ${rec.daily_goals.calories || '-'}, Protein ${rec.daily_goals.proteins || '-'}g</p>`;
+                        }
+                    } else if (Array.isArray(rec)) {
+                        rec.forEach(r => html += `<li style="padding: 0.8rem; border-bottom: 1px solid #f0f0f0;">✅ ${r}</li>`);
+                    }
+                    document.getElementById('dietContent').innerHTML = html || '<p>No recommendations available.</p>';
+                    document.getElementById('dietResults').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error getting diet recommendations:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

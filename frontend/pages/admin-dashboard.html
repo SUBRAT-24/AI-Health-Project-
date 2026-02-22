@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AI Health Assistant</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .admin-tabs button { padding: 0.75rem 1.25rem; border: 1px solid #e0e0e0; background: #fff; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .admin-tabs button.active { background: #00796b; color: #fff; border-color: #00796b; }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: #fff; padding: 1.25rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .stat-card h4 { color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .stat-card .num { font-size: 1.75rem; font-weight: 700; color: #00796b; }
+        .admin-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .admin-table th, .admin-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        .admin-table th { background: #f5f5f5; font-weight: 600; color: #333; }
+        .admin-table tr:hover { background: #fafafa; }
+        .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-warning { background: #fff3e0; color: #e65100; }
+        .badge-danger { background: #ffebee; color: #c62828; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; margin-right: 0.25rem; }
+        .search-box { margin-bottom: 1rem; }
+        .search-box input { padding: 0.5rem 1rem; width: 100%; max-width: 300px; border: 1px solid #ddd; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>🏥 Admin Panel</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Site Home</a></li>
+                <li><a href="login.html">User Login</a></li>
+                <li><a href="#" onclick="adminLogout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+        <div class="dashboard-header" style="margin-bottom: 2rem;">
+            <h1>Admin Dashboard</h1>
+            <p>Manage users, reports, and appointments</p>
+        </div>
+
+        <div class="admin-tabs">
+            <button type="button" class="active" data-tab="overview">Overview</button>
+            <button type="button" data-tab="users">Users</button>
+            <button type="button" data-tab="reports">Reports</button>
+            <button type="button" data-tab="appointments">Appointments</button>
+        </div>
+
+        <!-- Overview -->
+        <section id="section-overview" class="admin-section active">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><h4>Total Users</h4><div class="num" id="statUsers">--</div></div>
+                <div class="stat-card"><h4>Active Users</h4><div class="num" id="statActiveUsers">--</div></div>
+                <div class="stat-card"><h4>Total Reports</h4><div class="num" id="statReports">--</div></div>
+                <div class="stat-card"><h4>Pending Reports</h4><div class="num" id="statPendingReports">--</div></div>
+                <div class="stat-card"><h4>Appointments</h4><div class="num" id="statAppointments">--</div></div>
+                <div class="stat-card"><h4>Scheduled</h4><div class="num" id="statScheduled">--</div></div>
+            </div>
+        </section>
+
+        <!-- Users -->
+        <section id="section-users" class="admin-section">
+            <div class="search-box">
+                <input type="text" id="userSearch" placeholder="Search by name or email..." />
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="7">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="usersPagination" style="margin-top: 1rem;"></div>
+        </section>
+
+        <!-- Reports -->
+        <section id="section-reports" class="admin-section">
+            <div class="search-box">
+                <select id="reportStatusFilter">
+                    <option value="">All statuses</option>
+                    <option value="uploaded">Uploaded</option>
+                    <option value="pending_review">Pending review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>User</th><th>Description</th><th>Type</th><th>Status</th><th>Date</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <tr><td colspan="7">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="reportsPagination" style="margin-top: 1rem;"></div>
+        </section>
+
+        <!-- Appointments -->
+        <section id="section-appointments" class="admin-section">
+            <div class="search-box">
+                <select id="appointmentStatusFilter">
+                    <option value="">All statuses</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>User</th><th>Doctor</th><th>Date</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                        <tr><td colspan="6">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="appointmentsPagination" style="margin-top: 1rem;"></div>
+        </section>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        function adminLogout() {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = 'admin-login.html';
+        }
+
+        if (!localStorage.getItem('userToken') || localStorage.getItem('userRole') !== 'admin') {
+            window.location.href = 'admin-login.html';
+        }
+
+        document.querySelectorAll('.admin-tabs button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.getAttribute('data-tab');
+                document.querySelectorAll('.admin-tabs button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('section-' + tab).classList.add('active');
+                if (tab === 'overview') loadStats();
+                if (tab === 'users') loadUsers();
+                if (tab === 'reports') loadReports();
+                if (tab === 'appointments') loadAppointments();
+            });
+        });
+
+        async function loadStats() {
+            try {
+                const s = await window.adminAPI.getAdminStats();
+                document.getElementById('statUsers').textContent = s.total_users ?? '--';
+                document.getElementById('statActiveUsers').textContent = s.active_users ?? '--';
+                document.getElementById('statReports').textContent = s.total_reports ?? '--';
+                document.getElementById('statPendingReports').textContent = s.pending_reports ?? '--';
+                document.getElementById('statAppointments').textContent = s.total_appointments ?? '--';
+                document.getElementById('statScheduled').textContent = s.scheduled_appointments ?? '--';
+            } catch (e) {
+                document.getElementById('statsGrid').innerHTML = '<p style="color:#c62828">Failed to load stats: ' + e.message + '</p>';
+            }
+        }
+
+        let usersPage = 1;
+        async function loadUsers(page = 1) {
+            usersPage = page;
+            const search = document.getElementById('userSearch').value.trim();
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+            try {
+                const data = await window.adminAPI.getAdminUsers(page, search);
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">No users found.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.users.map(u => {
+                    const status = u.is_active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>';
+                    const created = u.created_at ? new Date(u.created_at).toLocaleDateString() : '--';
+                    let actions = '';
+                    if (u.role !== 'admin') {
+                        if (u.is_active) actions += `<button class="btn btn-sm btn-secondary" onclick="doDeactivate(${u.id})">Deactivate</button>`;
+                        else actions += `<button class="btn btn-sm btn-primary" onclick="doActivate(${u.id})">Activate</button>`;
+                        actions += ` <button class="btn btn-sm btn-danger" onclick="doDeleteUser(${u.id}, '${(u.email || '').replace(/'/g, "\\'")}')">Delete</button>`;
+                    }
+                    return `<tr>
+                        <td>${u.id}</td><td>${u.name || '--'}</td><td>${u.email || '--'}</td>
+                        <td>${u.role || 'user'}</td><td>${status}</td><td>${created}</td>
+                        <td>${actions}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="7">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        async function doDeactivate(id) {
+            if (!confirm('Deactivate this user?')) return;
+            try {
+                await window.adminAPI.deactivateUser(id);
+                window.adminAPI.showAdminToast('User deactivated', 'success');
+                loadUsers(usersPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+        async function doActivate(id) {
+            try {
+                await window.adminAPI.activateUser(id);
+                window.adminAPI.showAdminToast('User activated', 'success');
+                loadUsers(usersPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+        async function doDeleteUser(id, email) {
+            if (!confirm('Permanently delete user ' + email + '? This cannot be undone.')) return;
+            try {
+                await window.adminAPI.deleteUser(id);
+                window.adminAPI.showAdminToast('User deleted', 'success');
+                loadUsers(usersPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+
+        document.getElementById('userSearch').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') loadUsers(1);
+        });
+
+        let reportsPage = 1;
+        async function loadReports(page = 1) {
+            reportsPage = page;
+            const status = document.getElementById('reportStatusFilter').value;
+            const tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+            try {
+                const data = await window.adminAPI.getAdminReports(page, status);
+                if (!data.reports || data.reports.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">No reports found.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.reports.map(r => {
+                    const date = r.upload_date ? new Date(r.upload_date).toLocaleString() : '--';
+                    let actions = '';
+                    if (r.status !== 'approved') actions += `<button class="btn btn-sm btn-primary" onclick="doApproveReport(${r.id})">Approve</button>`;
+                    if (r.status !== 'rejected') actions += ` <button class="btn btn-sm btn-secondary" onclick="doRejectReport(${r.id})">Reject</button>`;
+                    actions += ` <button class="btn btn-sm btn-danger" onclick="doDeleteReport(${r.id})">Delete</button>`;
+                    return `<tr>
+                        <td>${r.id}</td><td>${r.user_name || '--'} (${r.user_email || '--'})</td>
+                        <td>${(r.description || '--').substring(0, 40)}</td><td>${r.report_type || '--'}</td>
+                        <td><span class="badge badge-${r.status === 'approved' ? 'success' : r.status === 'rejected' ? 'danger' : 'warning'}">${r.status}</span></td>
+                        <td>${date}</td><td>${actions}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="7">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        async function doApproveReport(id) {
+            try {
+                await window.adminAPI.approveReport(id);
+                window.adminAPI.showAdminToast('Report approved', 'success');
+                loadReports(reportsPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+        async function doRejectReport(id) {
+            try {
+                await window.adminAPI.rejectReport(id);
+                window.adminAPI.showAdminToast('Report rejected', 'success');
+                loadReports(reportsPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+        async function doDeleteReport(id) {
+            if (!confirm('Delete this report and its file?')) return;
+            try {
+                await window.adminAPI.deleteReport(id);
+                window.adminAPI.showAdminToast('Report deleted', 'success');
+                loadReports(reportsPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+
+        document.getElementById('reportStatusFilter').addEventListener('change', () => loadReports(1));
+
+        let appointmentsPage = 1;
+        async function loadAppointments(page = 1) {
+            appointmentsPage = page;
+            const status = document.getElementById('appointmentStatusFilter').value;
+            const tbody = document.getElementById('appointmentsTableBody');
+            tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+            try {
+                const data = await window.adminAPI.getAdminAppointments(page, status);
+                if (!data.appointments || data.appointments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No appointments found.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.appointments.map(a => {
+                    const date = a.appointment_date ? new Date(a.appointment_date).toLocaleString() : '--';
+                    let actions = '';
+                    if (a.status === 'scheduled') actions += `<button class="btn btn-sm btn-danger" onclick="doRejectAppointment(${a.id})">Cancel</button>`;
+                    return `<tr>
+                        <td>${a.id}</td><td>${a.user_name || '--'} (${a.user_email || '--'})</td>
+                        <td>${a.doctor_name || '--'}</td><td>${date}</td>
+                        <td><span class="badge badge-${a.status === 'scheduled' ? 'warning' : a.status === 'completed' ? 'success' : 'danger'}">${a.status}</span></td>
+                        <td>${actions}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6">Error: ' + e.message + '</td></tr>';
+            }
+        }
+
+        async function doRejectAppointment(id) {
+            if (!confirm('Cancel this appointment?')) return;
+            try {
+                await window.adminAPI.rejectAppointment(id);
+                window.adminAPI.showAdminToast('Appointment cancelled', 'success');
+                loadAppointments(appointmentsPage);
+            } catch (e) { window.adminAPI.showAdminToast(e.message, 'error'); }
+        }
+
+        document.getElementById('appointmentStatusFilter').addEventListener('change', () => loadAppointments(1));
+
+        loadStats();
+    </script>
+</body>
+</html>
