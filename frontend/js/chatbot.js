@@ -6,7 +6,7 @@
 let chatHistory = [];
 let isLoading = false;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const chatToggle = document.getElementById('chatbot-toggle');
     if (chatToggle) {
         chatToggle.addEventListener('click', toggleChatbot);
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const chatInput = document.getElementById('chatInput');
     if (chatInput) {
-        chatInput.addEventListener('keypress', function(e) {
+        chatInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter' && !isLoading) {
                 sendChat();
             }
@@ -38,7 +38,7 @@ function toggleChatbot() {
     if (chatbotContainer) {
         const isVisible = chatbotContainer.style.display !== 'none';
         chatbotContainer.style.display = isVisible ? 'none' : 'flex';
-        
+
         if (!isVisible) {
             // Focus input when opened
             setTimeout(() => {
@@ -107,20 +107,27 @@ async function sendChat() {
  * Send message to backend API
  */
 async function sendChatToAPI(message) {
+    const token = localStorage.getItem('userToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: headers,
         body: JSON.stringify({ message: message })
     });
 
     if (!response.ok) {
+        if (response.status === 401 || response.status === 422) {
+            return 'Please log in to use the health assistant chatbot.';
+        }
         throw new Error(`API error: ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.response || 'I didn\'t understand that. Could you clarify?';
+    return data.response || data.reply || 'I didn\'t understand that. Could you clarify?';
 }
 
 /**
@@ -133,19 +140,19 @@ function addUserMessage(message) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message user-message';
     messageDiv.style.animation = 'slideInUp 0.3s ease-out';
-    
+
     const content = document.createElement('div');
     content.className = 'message-content';
     content.innerHTML = `<p>${escapeHtml(message)}</p>`;
-    
+
     const time = document.createElement('div');
     time.className = 'message-time';
     time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
+
     messageDiv.appendChild(content);
     messageDiv.appendChild(time);
     messagesDiv.appendChild(messageDiv);
-    
+
     // Auto scroll
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
@@ -160,30 +167,30 @@ function addBotMessage(message, isWelcome = false, isError = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = isError ? 'message bot-message error' : 'message bot-message';
     messageDiv.style.animation = 'slideInUp 0.3s ease-out';
-    
+
     const content = document.createElement('div');
     content.className = 'message-content';
-    
+
     // Format message with line breaks
     const formattedMessage = message
         .replace(/\n/g, '<br>')
         .replace(/\(\d\)/g, '<strong>$&</strong>');
-    
+
     content.innerHTML = `<p>${formattedMessage}</p>`;
-    
+
     const time = document.createElement('div');
     time.className = 'message-time';
     time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
+
     messageDiv.appendChild(content);
     messageDiv.appendChild(time);
     messagesDiv.appendChild(messageDiv);
-    
+
     // Auto scroll
     setTimeout(() => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }, 100);
-    
+
     return content;
 }
 
@@ -198,15 +205,15 @@ function addTypingIndicator() {
     indicatorDiv.className = 'message bot-message typing';
     indicatorDiv.id = 'typing-indicator';
     indicatorDiv.style.animation = 'slideInUp 0.3s ease-out';
-    
+
     const content = document.createElement('div');
     content.className = 'message-content';
     content.innerHTML = '<div class="typing-animation"><span></span><span></span><span></span></div>';
-    
+
     indicatorDiv.appendChild(content);
     messagesDiv.appendChild(indicatorDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    
+
     return 'typing-indicator';
 }
 

@@ -4,54 +4,171 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - AI Health Assistant</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+    <meta name="description" content="Sign in to your AI Health Assistant dashboard to monitor your health data and access personalized recommendations.">
+    <link rel="stylesheet" href="../css/dashboard-new.css">
 </head>
 
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>🏥 AI Health Assistant</h1>
+<body style="margin:0;padding:0;">
+    <div class="auth-wrapper">
+        <div>
+            <div class="auth-card" id="loginCard">
+                <h2 id="loginTitle">🏥 Welcome Back</h2>
+                <p class="auth-subtitle" id="loginSubtitle">Sign in to your health dashboard</p>
+
+                <!-- Toggle: User / Admin -->
+                <div class="auth-toggle-container">
+                    <button class="auth-toggle-btn active" id="toggleUser" onclick="switchMode('user')">
+                        👤 User Login
+                    </button>
+                    <button class="auth-toggle-btn" id="toggleAdmin" onclick="switchMode('admin')">
+                        🛡️ Admin Login
+                    </button>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                    </div>
+
+                    <div class="auth-error" id="loginError"></div>
+
+                    <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">Sign In</button>
+                </form>
+
+                <div class="auth-divider"><span>or</span></div>
+
+                <div class="auth-links">
+                    Don't have an account? <a href="signup.html">Sign Up</a>
+                </div>
             </div>
-            <ul class="nav-menu">
-                <li><a href="../index.html">Back</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <div class="auth-container" style="max-width: 400px; margin: 3rem auto; padding: 0 2rem;">
-        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="text-align: center; color: #00796b; margin-bottom: 2rem;">Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
-            </form>
-
-            <p style="text-align: center; margin-top: 1.5rem;">
-                Don't have an account? <a href="signup.html" style="color: #00796b; font-weight: 600;">Sign Up</a>
-            </p>
-
-            <p style="text-align: center; margin-top: 0.5rem;">
-                <a href="#" style="color: #0097a7; font-size: 0.9rem;">Forgot Password?</a>
-            </p>
+            <div class="back-link">
+                <a href="../index.html">← Back to Home</a>
+            </div>
         </div>
     </div>
 
     <script src="../js/main.js"></script>
-    <script src="../js/auth.js"></script>
+    <script>
+        let currentMode = 'user';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const card = document.getElementById('loginCard');
+            const toggleUser = document.getElementById('toggleUser');
+            const toggleAdmin = document.getElementById('toggleAdmin');
+            const title = document.getElementById('loginTitle');
+            const subtitle = document.getElementById('loginSubtitle');
+            const errEl = document.getElementById('loginError');
+
+            errEl.style.display = 'none';
+            errEl.textContent = '';
+
+            if (mode === 'admin') {
+                card.classList.add('admin-mode');
+                toggleAdmin.classList.add('active');
+                toggleUser.classList.remove('active');
+                title.textContent = '🛡️ Admin Login';
+                subtitle.textContent = 'Administrator access only';
+            } else {
+                card.classList.remove('admin-mode');
+                toggleUser.classList.add('active');
+                toggleAdmin.classList.remove('active');
+                title.textContent = '🏥 Welcome Back';
+                subtitle.textContent = 'Sign in to your health dashboard';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+
+            errEl.style.display = 'none';
+            errEl.textContent = '';
+
+            if (!email || !password) {
+                errEl.textContent = 'Please fill in all fields.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+
+            try {
+                const response = await window.healthAssistant.apiRequest('/auth/login', 'POST', { email, password });
+
+                if (!response || !response.token) {
+                    throw new Error('Invalid response from server');
+                }
+
+                if (currentMode === 'admin') {
+                    if (response.role !== 'admin') {
+                        errEl.textContent = 'Access denied. Admin credentials required.';
+                        errEl.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign In';
+                        return;
+                    }
+
+                    localStorage.setItem('userToken', response.token);
+                    localStorage.setItem('userName', response.name);
+                    localStorage.setItem('userRole', 'admin');
+                    localStorage.setItem('userData', JSON.stringify({
+                        user_id: response.user_id,
+                        name: response.name,
+                        email: response.email,
+                        role: 'admin'
+                    }));
+
+                    window.healthAssistant.showToast('Admin login successful!', 'success');
+                    setTimeout(function () {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
+                } else {
+                    localStorage.setItem('userToken', response.token);
+                    localStorage.setItem('userName', response.name);
+                    const role = response.role || 'user';
+                    localStorage.setItem('userRole', role);
+                    localStorage.setItem('userData', JSON.stringify({
+                        user_id: response.user_id,
+                        name: response.name,
+                        email: response.email,
+                        role: role
+                    }));
+
+                    window.healthAssistant.showToast('Login successful!', 'success');
+                    const redirect = role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+                    setTimeout(function () {
+                        window.location.href = redirect;
+                    }, 1000);
+                }
+            } catch (err) {
+                errEl.textContent = err.message || 'Login failed. Please try again.';
+                errEl.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+            }
+        });
+
+        // Check URL params for pre-selecting admin mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'admin') {
+            switchMode('admin');
+        }
+    </script>
 </body>
 
 </html>

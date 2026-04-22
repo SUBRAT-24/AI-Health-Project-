@@ -10,7 +10,7 @@ bp = Blueprint('appointments', __name__, url_prefix='/api/appointments')
 def book_appointment():
     """Book a doctor appointment"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         if not all(k in data for k in ['doctor_name', 'appointment_date']):
@@ -44,7 +44,7 @@ def book_appointment():
 def get_appointments():
     """Get user's appointments"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         print(f'[DEBUG] Getting appointments for user {user_id}')
         
         appointments = Appointment.query.filter_by(user_id=user_id).order_by(
@@ -68,7 +68,7 @@ def get_appointments():
 def get_appointment(appointment_id):
     """Get specific appointment"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         appointment = Appointment.query.filter_by(
             id=appointment_id, 
             user_id=user_id
@@ -88,7 +88,7 @@ def get_appointment(appointment_id):
 def update_appointment(appointment_id):
     """Update appointment"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         appointment = Appointment.query.filter_by(
             id=appointment_id,
             user_id=user_id
@@ -125,7 +125,7 @@ def update_appointment(appointment_id):
 def cancel_appointment(appointment_id):
     """Cancel appointment"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         appointment = Appointment.query.filter_by(
             id=appointment_id,
             user_id=user_id
@@ -149,7 +149,7 @@ def cancel_appointment(appointment_id):
 def get_upcoming_appointments():
     """Get upcoming appointments"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         now = datetime.utcnow()
         
         appointments = Appointment.query.filter(

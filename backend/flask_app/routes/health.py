@@ -18,7 +18,7 @@ def test_health():
 def update_health():
     """Update health metrics"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         health_record = HealthRecord(
@@ -51,7 +51,7 @@ def update_health():
 def get_health_data():
     """Get user health data"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         print(f'[DEBUG] Getting health data for user {user_id}')
         days = request.args.get('days', 30, type=int)
         
@@ -78,7 +78,7 @@ def get_health_data():
 def get_health_summary():
     """Get health summary"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         # Get latest record
         latest = HealthRecord.query.filter_by(user_id=user_id).order_by(
@@ -131,7 +131,7 @@ def get_health_summary():
 def analyze_health():
     """Analyze health data using AI"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         # Get user's latest health records

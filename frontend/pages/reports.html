@@ -1,81 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - AI Health Assistant</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/dashboard-new.css">
 </head>
-
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>🏥 AI Health Assistant</h1>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="appointments.html">Appointments</a></li>
-                <li><a href="health-tracking.html">Health</a></li>
-                <li><a href="diet-suggestions.html">Diet</a></li>
-                <li><a href="exercise.html">Exercise</a></li>
-                <li><a href="#reports">Reports</a></li>
-                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand"><div class="sidebar-brand-icon">🏥</div><span class="sidebar-brand-name">HealthAI</span></div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-title">Menu</div>
+                <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span>Dashboard</a>
+                <a href="appointments.html" class="sidebar-link"><span class="sidebar-icon">📅</span>Appointments</a>
+                <a href="health-tracking.html" class="sidebar-link"><span class="sidebar-icon">💓</span>Health Tracking</a>
+                <a href="diet-suggestions.html" class="sidebar-link"><span class="sidebar-icon">🥗</span>Diet Plans</a>
+                <a href="exercise.html" class="sidebar-link"><span class="sidebar-icon">🏃</span>Exercise</a>
+                <a href="reports.html" class="sidebar-link active"><span class="sidebar-icon">📋</span>Reports</a>
+                <div class="sidebar-section-title">General</div>
+                <a href="#" class="sidebar-link"><span class="sidebar-icon">⚙️</span>Settings</a>
+                <a href="#" class="sidebar-link" onclick="window.healthAssistant.logoutUser()"><span class="sidebar-icon">🚪</span>Logout</a>
+            </nav>
+        </aside>
 
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>📋 Medical Reports</h1>
-            <button class="btn btn-primary"
-                onclick="document.getElementById('uploadModal').style.display='block'">Upload Report</button>
-        </div>
-
-        <div style="margin-top: 2rem;">
-            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Your Reports</h2>
-                <div id="reportsList">
-                    <p style="text-align: center; color: #999; padding: 2rem;">No reports uploaded yet. Click "Upload
-                        Report" to add your first report.</p>
+        <div class="main-content">
+            <header class="topbar">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+                    <div class="topbar-search"><span class="topbar-search-icon">🔍</span><input type="text" placeholder="Search reports..."></div>
                 </div>
-            </div>
+                <div class="topbar-actions">
+                    <div class="topbar-user">
+                        <div class="topbar-avatar" id="userAvatar">U</div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name" id="topbarUserName">User</span>
+                            <span class="topbar-user-email" id="topbarUserEmail"></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1>Medical Reports</h1>
+                        <p>Upload and manage your medical documents</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary" onclick="openUploadModal()">+ Upload Report</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Your Reports</span>
+                    </div>
+                    <div id="reportsList">
+                        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading reports...</p>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
     <!-- Upload Modal -->
-    <div id="uploadModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('uploadModal').style.display='none'">&times;</span>
-            <h2 style="color: #00796b; margin-bottom: 1.5rem;">Upload Medical Report</h2>
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeUploadModal()">×</button>
+            <h2>Upload Medical Report</h2>
             <form id="uploadForm">
                 <div class="form-group">
                     <label for="reportFile">Select File</label>
                     <input type="file" id="reportFile" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
                 </div>
-
                 <div class="form-group">
                     <label for="reportDescription">Description</label>
-                    <textarea id="reportDescription" rows="3"
-                        placeholder="e.g. Blood Test Report - Feb 2026"></textarea>
+                    <textarea id="reportDescription" rows="3" placeholder="e.g. Blood Test Report - Feb 2026"></textarea>
                 </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Upload</button>
+                <button type="submit" class="auth-submit-btn">Upload</button>
             </form>
         </div>
     </div>
 
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (!window.healthAssistant || !window.healthAssistant.isAuthenticated()) {
-                window.location.href = 'login.html';
-                return;
+                window.location.href = 'login.html'; return;
             }
+            const userName = localStorage.getItem('userName') || 'User';
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            document.getElementById('topbarUserName').textContent = userName;
+            document.getElementById('topbarUserEmail').textContent = userData.email || '';
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
             loadReports();
         });
 
@@ -91,7 +111,7 @@
 
             try {
                 await window.healthAssistant.uploadReport(file, description);
-                document.getElementById('uploadModal').style.display = 'none';
+                closeUploadModal();
                 document.getElementById('uploadForm').reset();
                 loadReports();
             } catch (error) {
@@ -105,32 +125,41 @@
                 const container = document.getElementById('reportsList');
 
                 if (reports && reports.length > 0) {
-                    let html = '<table style="width: 100%;"><thead><tr style="border-bottom: 2px solid #e0e0e0;"><th style="text-align: left; padding: 1rem;">Description</th><th style="text-align: left; padding: 1rem;">Date</th></tr></thead><tbody>';
+                    let html = '<table class="data-table"><thead><tr><th>Description</th><th>Type</th><th>Date</th><th>Status</th></tr></thead><tbody>';
                     reports.forEach(report => {
                         const date = report.uploaded_at || report.upload_date;
                         const dateStr = date ? new Date(date).toLocaleDateString('en-US', { dateStyle: 'medium' }) : 'N/A';
-                        html += `<tr style="border-bottom: 1px solid #f0f0f0;">
-                            <td style="padding: 1rem;">${report.description || 'No description'}</td>
-                            <td style="padding: 1rem;">${dateStr}</td>
+                        html += `<tr>
+                            <td>${report.description || 'No description'}</td>
+                            <td>${report.report_type || 'General'}</td>
+                            <td>${dateStr}</td>
+                            <td><span class="health-item-status normal">${report.status || 'Uploaded'}</span></td>
                         </tr>`;
                     });
                     html += '</tbody></table>';
                     container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No reports uploaded yet. Click "Upload Report" to add your first report.</p>';
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No reports uploaded yet. Click "Upload Report" to add your first report.</p>';
                 }
             } catch (error) {
                 console.error('Error loading reports:', error);
             }
         }
 
-        window.onclick = function (event) {
+        function openUploadModal() {
             const modal = document.getElementById('uploadModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
+            modal.style.display = 'flex'; modal.classList.add('active');
         }
+
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.style.display = 'none'; modal.classList.remove('active');
+        }
+
+        window.addEventListener('click', function (e) {
+            const modal = document.getElementById('uploadModal');
+            if (e.target === modal) closeUploadModal();
+        });
     </script>
 </body>
-
 </html>

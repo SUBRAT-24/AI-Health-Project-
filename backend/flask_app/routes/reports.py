@@ -17,7 +17,7 @@ def allowed_file(filename):
 def upload_report():
     """Upload health report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
@@ -65,7 +65,7 @@ def upload_report():
 def get_reports():
     """Get user's reports"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         reports = Report.query.filter_by(user_id=user_id).order_by(
             Report.upload_date.desc()
@@ -85,7 +85,7 @@ def get_reports():
 def get_report(report_id):
     """Get specific report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         report = Report.query.filter_by(
             id=report_id,
             user_id=user_id
@@ -105,7 +105,7 @@ def get_report(report_id):
 def delete_report(report_id):
     """Delete report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         report = Report.query.filter_by(
             id=report_id,
             user_id=user_id
@@ -134,7 +134,7 @@ def delete_report(report_id):
 def analyze_report(report_id):
     """Analyze report using AI"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         report = Report.query.filter_by(
             id=report_id,
             user_id=user_id

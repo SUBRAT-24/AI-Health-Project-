@@ -1,116 +1,578 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Health Assistant - Your Personal Health Platform</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <title>AI Health Assistant - Your Personal AI-Powered Health Platform</title>
+    <meta name="description" content="Monitor your health, get personalized diet and exercise recommendations, and consult with AI — all in one beautiful platform.">
+    <link rel="stylesheet" href="css/dashboard-new.css">
+    <style>
+        /* ===== LANDING PAGE SPECIFIC ===== */
+        .landing-body {
+            overflow-x: hidden;
+        }
+
+        /* Top Nav */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition-base);
+        }
+
+        .landing-nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .landing-nav-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-green);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .landing-nav-brand-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .landing-nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .landing-nav-links a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition-fast);
+        }
+
+        .landing-nav-links a:hover {
+            color: var(--primary-green);
+        }
+
+        .landing-nav-links .nav-btn-login {
+            padding: 0.55rem 1.25rem;
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .landing-nav-links .nav-btn-login:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .landing-nav-links .nav-btn-signup {
+            padding: 0.55rem 1.25rem;
+            background: var(--primary-green);
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .landing-nav-links .nav-btn-signup:hover {
+            background: var(--primary-green-dark);
+            border-color: var(--primary-green-dark);
+        }
+
+        /* Hero */
+        .landing-hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 3rem 4rem;
+            background: linear-gradient(135deg, #F1F8E9 0%, #E8F5E9 30%, #C8E6C9 100%);
+            gap: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .landing-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(27, 94, 32, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .landing-hero-content {
+            flex: 1;
+            max-width: 560px;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .landing-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--mint);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .landing-hero-content h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.15;
+            margin-bottom: 1.25rem;
+            letter-spacing: -1.5px;
+        }
+
+        .landing-hero-content h1 span {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .landing-hero-content p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .landing-hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .landing-hero-visual {
+            flex: 1;
+            max-width: 480px;
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .hero-card-preview {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(27, 94, 32, 0.12);
+            border: 1px solid var(--border-color);
+        }
+
+        .hero-card-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-preview-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .hero-preview-dot.r { background: #EF5350; }
+        .hero-preview-dot.y { background: #FFC107; }
+        .hero-preview-dot.g { background: #4CAF50; }
+
+        .hero-mini-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-mini-stat {
+            padding: 1rem;
+            border-radius: 12px;
+            background: var(--bg-main);
+            text-align: center;
+        }
+
+        .hero-mini-stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-green);
+        }
+
+        .hero-mini-stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .hero-mini-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            justify-content: center;
+            height: 60px;
+        }
+
+        .hero-mini-chart-bar {
+            width: 24px;
+            border-radius: 6px 6px 3px 3px;
+            background: linear-gradient(180deg, var(--accent-green), var(--accent-green-light));
+            animation: barGrow 1s ease-out backwards;
+            transform-origin: bottom;
+        }
+
+        .hero-mini-chart-bar:nth-child(1) { height: 30px; animation-delay: 0.1s; }
+        .hero-mini-chart-bar:nth-child(2) { height: 45px; animation-delay: 0.2s; }
+        .hero-mini-chart-bar:nth-child(3) { height: 35px; animation-delay: 0.3s; }
+        .hero-mini-chart-bar:nth-child(4) { height: 55px; animation-delay: 0.4s; }
+        .hero-mini-chart-bar:nth-child(5) { height: 40px; animation-delay: 0.5s; }
+        .hero-mini-chart-bar:nth-child(6) { height: 50px; animation-delay: 0.6s; }
+
+        /* Features */
+        .landing-features {
+            padding: 5rem 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .landing-features h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .landing-features-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .landing-features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .landing-feature-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            transition: var(--transition-base);
+            cursor: default;
+        }
+
+        .landing-feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-green-light);
+        }
+
+        .landing-feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: var(--mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1.25rem;
+        }
+
+        .landing-feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.6rem;
+        }
+
+        .landing-feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* About */
+        .landing-about {
+            background: var(--mint-light);
+            padding: 5rem 3rem;
+        }
+
+        .landing-about-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .landing-about h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .landing-about p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .landing-footer {
+            background: var(--primary-green-dark);
+            color: white;
+            padding: 3.5rem 3rem 1.5rem;
+        }
+
+        .landing-footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .landing-footer h4 {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .landing-footer p {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .landing-footer ul {
+            list-style: none;
+        }
+
+        .landing-footer ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .landing-footer ul a {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.9rem;
+            transition: var(--transition-fast);
+        }
+
+        .landing-footer ul a:hover {
+            color: white;
+        }
+
+        .landing-footer-bottom {
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.25rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        @media (max-width: 1024px) {
+            .landing-hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 7rem 2rem 3rem;
+            }
+
+            .landing-hero-buttons { justify-content: center; }
+            .landing-hero-visual { max-width: 400px; }
+            .landing-features-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .landing-nav { padding: 1rem 1.5rem; }
+            .landing-nav-links { display: none; }
+            .landing-hero-content h1 { font-size: 2.2rem; }
+            .landing-features-grid { grid-template-columns: 1fr; }
+            .landing-footer-content { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>🏥 AI Health Assistant</h1>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="pages/login.html" class="btn-login">Login</a></li>
-                <li><a href="pages/signup.html" class="btn-signup">Sign Up</a></li>
-                <li><a href="pages/admin-login.html" style="color:#ff6f00;">Admin</a></li>
-            </ul>
+
+<body class="landing-body">
+
+    <!-- Navigation -->
+    <nav class="landing-nav">
+        <div class="landing-nav-brand">
+            <div class="landing-nav-brand-icon">🏥</div>
+            <span class="landing-nav-brand-name">HealthAI</span>
         </div>
+        <ul class="landing-nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="pages/login.html" class="nav-btn-login">Login</a></li>
+            <li><a href="pages/signup.html" class="nav-btn-signup">Sign Up</a></li>
+        </ul>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h2>Your AI-Powered Health Companion</h2>
-            <p>Monitor your health, get personalized recommendations, and consult with doctors - all in one place</p>
-            <div class="hero-buttons">
-                <a href="pages/signup.html" class="btn btn-primary">Get Started</a>
-                <a href="#features" class="btn btn-secondary">Learn More</a>
+    <section id="home" class="landing-hero">
+        <div class="landing-hero-content">
+            <div class="landing-hero-badge">✨ AI-Powered Platform</div>
+            <h1>Your Personal <span>Health Companion</span></h1>
+            <p>Monitor your health, get personalized recommendations, and consult with AI — all in one beautiful, intelligent platform.</p>
+            <div class="landing-hero-buttons">
+                <a href="pages/signup.html" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                    Get Started →
+                </a>
+                <a href="#features" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                    Learn More
+                </a>
             </div>
         </div>
-        <div class="hero-image">
-            <div class="placeholder-image">📊 Health Monitoring</div>
+        <div class="landing-hero-visual">
+            <div class="hero-card-preview">
+                <div class="hero-card-preview-header">
+                    <div class="hero-preview-dot r"></div>
+                    <div class="hero-preview-dot y"></div>
+                    <div class="hero-preview-dot g"></div>
+                </div>
+                <div class="hero-mini-stats">
+                    <div class="hero-mini-stat">
+                        <div class="hero-mini-stat-value">72</div>
+                        <div class="hero-mini-stat-label">Heart Rate</div>
+                    </div>
+                    <div class="hero-mini-stat">
+                        <div class="hero-mini-stat-value">120/80</div>
+                        <div class="hero-mini-stat-label">Blood Pressure</div>
+                    </div>
+                    <div class="hero-mini-stat">
+                        <div class="hero-mini-stat-value">36.6°</div>
+                        <div class="hero-mini-stat-label">Temperature</div>
+                    </div>
+                    <div class="hero-mini-stat">
+                        <div class="hero-mini-stat-value">98%</div>
+                        <div class="hero-mini-stat-label">O₂ Saturation</div>
+                    </div>
+                </div>
+                <div class="hero-mini-chart">
+                    <div class="hero-mini-chart-bar"></div>
+                    <div class="hero-mini-chart-bar"></div>
+                    <div class="hero-mini-chart-bar"></div>
+                    <div class="hero-mini-chart-bar"></div>
+                    <div class="hero-mini-chart-bar"></div>
+                    <div class="hero-mini-chart-bar"></div>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="features">
-        <h2>Our Features</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📈</div>
+    <section id="features" class="landing-features">
+        <h2>Powerful Features</h2>
+        <p class="landing-features-subtitle">Everything you need to take control of your health journey</p>
+        <div class="landing-features-grid">
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">📈</div>
                 <h3>Health Monitoring</h3>
-                <p>Real-time health tracking and monitoring with AI-powered insights</p>
+                <p>Real-time health tracking and monitoring with AI-powered insights and alerts</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🩺</div>
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">🩺</div>
                 <h3>Doctor Consultation</h3>
                 <p>Book appointments and consult with qualified medical professionals</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🥗</div>
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">🥗</div>
                 <h3>Diet Suggestions</h3>
-                <p>Personalized nutrition and diet recommendations based on your profile</p>
+                <p>Personalized nutrition recommendations based on your unique health profile</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🏃</div>
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">🏃</div>
                 <h3>Exercise Plans</h3>
-                <p>Customized exercise routines tailored to your health goals</p>
+                <p>Customized exercise routines tailored to your fitness level and health goals</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">💊</div>
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">💊</div>
                 <h3>Medicine Tracking</h3>
-                <p>Track prescribed medications and set reminders</p>
+                <p>Track prescribed medications with smart reminders so you never miss a dose</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
+            <div class="landing-feature-card">
+                <div class="landing-feature-icon">🤖</div>
                 <h3>AI Chatbot</h3>
-                <p>24/7 health advice and support from our intelligent chatbot</p>
+                <p>24/7 health advice and instant support from our intelligent AI assistant</p>
             </div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="about">
-        <h2>About AI Health Assistant</h2>
-        <p>Our platform combines cutting-edge AI technology with healthcare expertise to provide comprehensive health management solutions. We use advanced machine learning models including CNN for disease detection, NLP for health analysis, and LLMs for personalized recommendations.</p>
+    <section id="about" class="landing-about">
+        <div class="landing-about-inner">
+            <h2>About AI Health Assistant</h2>
+            <p>Our platform combines cutting-edge AI technology with healthcare expertise to provide comprehensive health
+                management solutions. We use advanced machine learning models including CNN for disease detection, NLP for
+                health analysis, and LLMs for personalized recommendations.</p>
+        </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>AI Health Assistant</h4>
-                <p>Your personal health companion powered by AI</p>
+    <footer id="contact" class="landing-footer">
+        <div class="landing-footer-content">
+            <div>
+                <h4>🏥 HealthAI</h4>
+                <p>Your personal health companion powered by advanced artificial intelligence.</p>
             </div>
-            <div class="footer-section">
+            <div>
                 <h4>Quick Links</h4>
                 <ul>
                     <li><a href="pages/login.html">Login</a></li>
-                    <li><a href="pages/admin-login.html">Admin Login</a></li>
+                    <li><a href="pages/signup.html">Sign Up</a></li>
+                    <li><a href="pages/login.html?mode=admin">Admin Login</a></li>
                     <li><a href="#about">About Us</a></li>
                 </ul>
             </div>
-            <div class="footer-section">
+            <div>
                 <h4>Contact Us</h4>
                 <p>Email: support@aihealthassistant.com</p>
                 <p>Phone: +1-800-HEALTH</p>
             </div>
         </div>
-        <div class="footer-bottom">
+        <div class="landing-footer-bottom">
             <p>&copy; 2026 AI Health Assistant. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="js/main.js"></script>
 </body>
+
 </html>

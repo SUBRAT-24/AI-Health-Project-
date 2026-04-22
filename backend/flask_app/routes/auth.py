@@ -34,7 +34,7 @@ def signup():
         db.session.commit()
         
         # Generate token
-        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
+        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(hours=24))
         
         return jsonify({
             'message': 'User created successfully',
@@ -66,7 +66,7 @@ def login():
             return jsonify({'error': 'Account is deactivated'}), 403
         
         # Generate token
-        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
+        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(hours=24))
         print(f'[DEBUG] Login successful for user {user.id}, token: {access_token[:20]}...')
         
         role = getattr(user, 'role', None) or 'user'
@@ -89,7 +89,7 @@ def login():
 def get_profile():
     """Get user profile"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user:
@@ -106,7 +106,7 @@ def get_profile():
 def update_profile():
     """Update user profile"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user:
@@ -145,7 +145,7 @@ def update_profile():
 def change_password():
     """Change user password"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user:

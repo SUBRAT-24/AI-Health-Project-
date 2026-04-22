@@ -37,7 +37,7 @@ health_responses = {
 def chat_message():
     """Process chatbot messages"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         message = data.get('message', '').lower()
@@ -62,7 +62,8 @@ def chat_message():
         
         return jsonify({
             'message': message,
-            'reply': response,
+            'response': response,   # frontend chatbot.js expects 'response'
+            'reply': response,      # kept for backward compat
             'timestamp': None
         }), 200
         

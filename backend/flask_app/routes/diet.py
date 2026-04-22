@@ -8,7 +8,7 @@ bp = Blueprint('diet', __name__, url_prefix='/api/diet')
 def get_diet_recommendations():
     """Get personalized diet recommendations"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         # Simple recommendation logic - can be enhanced with ML
@@ -96,7 +96,7 @@ def get_diet_recommendations():
 def generate_meal_plan():
     """Generate weekly meal plan"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         meal_plan = {
             'week_plan': {

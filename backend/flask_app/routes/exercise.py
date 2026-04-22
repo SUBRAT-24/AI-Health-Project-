@@ -8,7 +8,7 @@ bp = Blueprint('exercise', __name__, url_prefix='/api/exercise')
 def get_exercise_recommendations():
     """Get personalized exercise recommendations"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         age = data.get('age')
@@ -114,7 +114,7 @@ def get_exercise_recommendations():
 def log_exercise():
     """Log completed exercise"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         # Store exercise log (would go to database)
@@ -142,7 +142,7 @@ def log_exercise():
 def get_exercise_history():
     """Get user's exercise history"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         # Get from database (placeholder)
         history = {

@@ -1,73 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise Plans - AI Health Assistant</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/dashboard-new.css">
 </head>
-
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>🏥 AI Health Assistant</h1>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="appointments.html">Appointments</a></li>
-                <li><a href="health-tracking.html">Health</a></li>
-                <li><a href="diet-suggestions.html">Diet</a></li>
-                <li><a href="#exercise">Exercise</a></li>
-                <li><a href="reports.html">Reports</a></li>
-                <li><a href="#" onclick="window.healthAssistant.logoutUser()">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand"><div class="sidebar-brand-icon">🏥</div><span class="sidebar-brand-name">HealthAI</span></div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-title">Menu</div>
+                <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span>Dashboard</a>
+                <a href="appointments.html" class="sidebar-link"><span class="sidebar-icon">📅</span>Appointments</a>
+                <a href="health-tracking.html" class="sidebar-link"><span class="sidebar-icon">💓</span>Health Tracking</a>
+                <a href="diet-suggestions.html" class="sidebar-link"><span class="sidebar-icon">🥗</span>Diet Plans</a>
+                <a href="exercise.html" class="sidebar-link active"><span class="sidebar-icon">🏃</span>Exercise</a>
+                <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span>Reports</a>
+                <div class="sidebar-section-title">General</div>
+                <a href="#" class="sidebar-link"><span class="sidebar-icon">⚙️</span>Settings</a>
+                <a href="#" class="sidebar-link" onclick="window.healthAssistant.logoutUser()"><span class="sidebar-icon">🚪</span>Logout</a>
+            </nav>
+        </aside>
 
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>🏃 Exercise Plans</h1>
-        </div>
-
-        <div style="margin-top: 2rem;">
-            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Get Exercise Recommendations</h2>
-                <form id="exerciseForm">
-                    <div class="form-group">
-                        <label for="fitnessLevel">Fitness Level</label>
-                        <select id="fitnessLevel" required>
-                            <option value="beginner">Beginner</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="advanced">Advanced</option>
-                        </select>
+        <div class="main-content">
+            <header class="topbar">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+                    <div class="topbar-search"><span class="topbar-search-icon">🔍</span><input type="text" placeholder="Search..."></div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="topbar-user">
+                        <div class="topbar-avatar" id="userAvatar">U</div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name" id="topbarUserName">User</span>
+                            <span class="topbar-user-email" id="topbarUserEmail"></span>
+                        </div>
                     </div>
+                </div>
+            </header>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Get Recommendations</button>
-                </form>
-            </div>
-        </div>
+            <main class="page-content">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1>Exercise Plans</h1>
+                        <p>Get customized workout routines based on your fitness level</p>
+                    </div>
+                </div>
 
-        <div id="exerciseResults" style="margin-top: 2rem; display: none;">
-            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <h2 style="color: #00796b; margin-bottom: 1.5rem;">Your Exercise Plan</h2>
-                <div id="exerciseContent"></div>
-            </div>
+                <!-- Exercise Form -->
+                <div class="card" style="margin-bottom:1.5rem;">
+                    <div class="card-header"><span class="card-title">Get Exercise Recommendations</span></div>
+                    <form id="exerciseForm">
+                        <div class="form-group">
+                            <label for="fitnessLevel">Fitness Level</label>
+                            <select id="fitnessLevel" required>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Get Recommendations</button>
+                    </form>
+                </div>
+
+                <!-- Results -->
+                <div class="card" id="exerciseResults" style="display: none;">
+                    <div class="card-header"><span class="card-title">Your Exercise Plan</span></div>
+                    <div id="exerciseContent"></div>
+                </div>
+            </main>
         </div>
     </div>
 
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (!window.healthAssistant || !window.healthAssistant.isAuthenticated()) {
-                window.location.href = 'login.html';
-                return;
+                window.location.href = 'login.html'; return;
             }
+            const userName = localStorage.getItem('userName') || 'User';
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            document.getElementById('topbarUserName').textContent = userName;
+            document.getElementById('topbarUserEmail').textContent = userData.email || '';
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
         });
+
         document.getElementById('exerciseForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const level = document.getElementById('fitnessLevel').value;
@@ -77,25 +98,39 @@
                 if (result) {
                     let html = '';
                     if (result.daily_recommendation && result.daily_recommendation.length) {
-                        html += '<h4 style="color: #00796b;">Daily Plan</h4><ul style="list-style: none; padding: 0;">';
+                        html += '<h4 style="color:var(--primary-green);margin-bottom:0.75rem;">Daily Plan</h4>';
                         result.daily_recommendation.forEach(ex => {
                             const name = ex.exercise || ex;
-                            const duration = ex.duration ? ` (${ex.duration} min)` : '';
-                            html += `<li style="padding: 0.5rem 0;">💪 ${name}${duration} - ${ex.description || ''}</li>`;
+                            const duration = ex.duration ? `${ex.duration} min` : '';
+                            html += `<div class="health-item">
+                                <div class="health-item-icon steps">💪</div>
+                                <div class="health-item-info">
+                                    <div class="health-item-name">${name}</div>
+                                    <div class="health-item-date">${ex.description || ''}</div>
+                                </div>
+                                <span class="health-item-status normal">${duration}</span>
+                            </div>`;
                         });
-                        html += '</ul>';
                     }
                     if (result.weekly_plan && result.weekly_plan.length) {
-                        html += '<h4 style="color: #00796b; margin-top: 1rem;">Weekly Plan</h4><ul style="list-style: none; padding: 0;">';
-                        result.weekly_plan.forEach(day => html += `<li style="padding: 0.3rem 0;">📅 ${day}</li>`);
-                        html += '</ul>';
+                        html += '<h4 style="color:var(--primary-green);margin:1.25rem 0 0.75rem;">Weekly Plan</h4>';
+                        result.weekly_plan.forEach(day => {
+                            html += `<div class="health-item">
+                                <div class="health-item-icon bp">📅</div>
+                                <div class="health-item-info"><div class="health-item-name">${day}</div></div>
+                            </div>`;
+                        });
                     }
                     if (result.tips && result.tips.length) {
-                        html += '<h4 style="color: #00796b; margin-top: 1rem;">Tips</h4><ul style="list-style: none; padding: 0;">';
-                        result.tips.forEach(t => html += `<li style="padding: 0.3rem 0;">✓ ${t}</li>`);
-                        html += '</ul>';
+                        html += '<h4 style="color:var(--primary-green);margin:1.25rem 0 0.75rem;">Tips</h4>';
+                        result.tips.forEach(t => {
+                            html += `<div class="health-item">
+                                <div class="health-item-icon heart">✓</div>
+                                <div class="health-item-info"><div class="health-item-name">${t}</div></div>
+                            </div>`;
+                        });
                     }
-                    document.getElementById('exerciseContent').innerHTML = html || '<p>No recommendations available.</p>';
+                    document.getElementById('exerciseContent').innerHTML = html || '<p style="color:var(--text-muted);">No recommendations available.</p>';
                     document.getElementById('exerciseResults').style.display = 'block';
                 }
             } catch (error) {
@@ -104,5 +139,4 @@
         });
     </script>
 </body>
-
 </html>
