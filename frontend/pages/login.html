@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - AI Health Assistant</title>
     <meta name="description" content="Sign in to your AI Health Assistant dashboard to monitor your health data and access personalized recommendations.">
@@ -39,6 +39,10 @@
                         <input type="password" id="password" name="password" required placeholder="••••••••">
                     </div>
 
+                    <div style="text-align:right;margin-bottom:.75rem;">
+                        <a href="#" onclick="openForgotModal();return false;" style="font-size:.82rem;color:var(--primary-green);font-weight:600;">Forgot Password?</a>
+                    </div>
+
                     <div class="auth-error" id="loginError"></div>
 
                     <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">Sign In</button>
@@ -57,6 +61,23 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-card" style="max-width:420px;">
+            <button class="modal-close" onclick="closeForgotModal()">×</button>
+            <h2 style="text-align:center;">🔐 Reset Password</h2>
+            <p style="text-align:center;color:var(--text-secondary);font-size:.88rem;margin-bottom:1.5rem;">Enter your email and we'll send you a reset link</p>
+            <div class="form-group">
+                <label for="forgotEmail">Email Address</label>
+                <input type="email" id="forgotEmail" placeholder="your@email.com">
+            </div>
+            <div class="auth-error" id="forgotError" style="display:none;"></div>
+            <div id="forgotHint" style="display:none;margin-bottom:1rem;padding:.65rem 1rem;background:var(--bg-main);border-radius:8px;border-left:3px solid var(--accent-green);font-size:.85rem;color:var(--text-secondary);word-break:break-all;"></div>
+            <button class="auth-submit-btn" id="forgotSubmitBtn" onclick="sendForgotReset()">📨 Send Reset Link</button>
+        </div>
+    </div>
+
+    <script src="../js/api-config.js"></script>
     <script src="../js/main.js"></script>
     <script>
         let currentMode = 'user';
@@ -111,6 +132,13 @@
                 const response = await window.healthAssistant.apiRequest('/auth/login', 'POST', { email, password });
 
                 if (!response || !response.token) {
+                    // If response is null, apiRequest already showed the error toast
+                    if (response === null) {
+                        // Auth error already handled by apiRequest (401/422)
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign In';
+                        return;
+                    }
                     throw new Error('Invalid response from server');
                 }
 
@@ -167,6 +195,61 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('mode') === 'admin') {
             switchMode('admin');
+        }
+
+        // ─── FORGOT PASSWORD MODAL ──────────────────────────────────────
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.add('active');
+            document.getElementById('forgotError').style.display = 'none';
+            document.getElementById('forgotHint').style.display = 'none';
+        }
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('active');
+        }
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('forgotModal')) closeForgotModal();
+        });
+
+        async function sendForgotReset() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const errorEl = document.getElementById('forgotError');
+            const hintEl = document.getElementById('forgotHint');
+            const btn = document.getElementById('forgotSubmitBtn');
+
+            errorEl.style.display = 'none';
+            hintEl.style.display = 'none';
+
+            if (!email) {
+                errorEl.textContent = 'Please enter your email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const resp = await fetch(API_BASE_URL + '/settings/request-password-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email }),
+                });
+                const data = await resp.json();
+
+                if (data.hint) {
+                    hintEl.innerHTML = data.hint;
+                    hintEl.style.display = 'block';
+                } else {
+                    hintEl.textContent = data.message || 'Check your email for the reset link.';
+                    hintEl.style.display = 'block';
+                }
+            } catch (e) {
+                errorEl.textContent = 'Cannot connect to server';
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📨 Send Reset Link';
+            }
         }
     </script>
 </body>

@@ -7,6 +7,13 @@ Run this from the project root: python run_backend.py
 import os
 import sys
 
+# ─── Fix Windows console encoding ──────────────────────────────────────────────
+# Prevents UnicodeEncodeError with emoji on cp1252 (Windows default)
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ('utf-8', 'utf8'):
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 # ─── Path Setup ────────────────────────────────────────────────────────────────
 project_root = os.path.dirname(os.path.abspath(__file__))   # d:/Project1
 backend_path = os.path.join(project_root, 'backend')
@@ -22,7 +29,7 @@ from flask_app.models import db
 
 def main():
     print("\n" + "=" * 60)
-    print("🚀  AI Health Assistant - Flask Backend")
+    print("[*] AI Health Assistant - Flask Backend")
     print("=" * 60)
 
     # Ensure instance directory exists for SQLite
@@ -33,22 +40,22 @@ def main():
     uploads_dir = os.path.join(project_root, 'uploads')
     os.makedirs(uploads_dir, exist_ok=True)
 
-    print("📦  Initialising Flask application...")
+    print("[+] Initialising Flask application...")
     app = create_flask_app()
 
     # Tables are already created inside create_flask_app(); this is a safety net
     with app.app_context():
         db.create_all()
-        print("✓   Database tables ready")
+        print("[OK] Database tables ready")
 
     print("\n" + "=" * 60)
-    print("✅  Backend Started Successfully!")
+    print("[OK] Backend Started Successfully!")
     print("=" * 60)
-    print(f"🌐  API Base URL  : http://localhost:5000/api")
-    print(f"🏥  Health Check  : http://localhost:5000/api/healthcheck")
-    print(f"🖥️   Frontend      : http://localhost:5000")
-    print(f"🗄️   Database      : SQLite → instance/health_assistant.db")
-    print(f"📁  Uploads       : {uploads_dir}")
+    print(f"    API Base URL  : http://localhost:5000/api")
+    print(f"    Health Check  : http://localhost:5000/api/healthcheck")
+    print(f"    Frontend      : http://localhost:5000")
+    print(f"    Database      : SQLite -> instance/health_assistant.db")
+    print(f"    Uploads       : {uploads_dir}")
     print("=" * 60 + "\n")
 
     app.run(

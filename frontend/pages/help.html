@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - AI Health Assistant</title>
+    <meta name="description" content="Get help, find answers to common questions, contact support and access health education resources.">
+    <link rel="stylesheet" href="../css/dashboard-new.css">
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+<body>
+    <div class="app-layout">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🏥</div>
+                <span class="sidebar-brand-name">HealthAI</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-title">Menu</div>
+                <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                <a href="appointments.html" class="sidebar-link"><span class="sidebar-icon">📅</span> Appointments</a>
+                <a href="health-tracking.html" class="sidebar-link"><span class="sidebar-icon">💓</span> Health Tracking</a>
+                <a href="diet-suggestions.html" class="sidebar-link"><span class="sidebar-icon">🥗</span> Diet Plans</a>
+                <a href="exercise.html" class="sidebar-link"><span class="sidebar-icon">🏃</span> Exercise</a>
+                <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span> Reports</a>
+                <div class="sidebar-section-title">General</div>
+                <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+                <a href="help.html" class="sidebar-link active"><span class="sidebar-icon">❓</span> Help</a>
+                <a href="#" class="sidebar-link" onclick="window.healthAssistant.logoutUser()"><span class="sidebar-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content">
+            <header class="topbar">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+                    <div class="topbar-search">
+                        <span class="topbar-search-icon">🔍</span>
+                        <input type="text" placeholder="Search help articles..." id="helpSearch" oninput="filterFAQ(this.value)">
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="topbar-user">
+                        <div class="topbar-avatar" id="userAvatar">U</div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name" id="topbarUserName">User</span>
+                            <span class="topbar-user-email" id="topbarUserEmail">user@health.com</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1>❓ Help & Support</h1>
+                        <p>Find answers, get support, and learn about your health</p>
+                    </div>
+                </div>
+
+                <!-- Help Navigation Tabs -->
+                <div class="settings-tabs" id="helpTabs">
+                    <button class="settings-tab active" data-tab="faq" onclick="switchHelpTab('faq')">📚 FAQ</button>
+                    <button class="settings-tab" data-tab="contact" onclick="switchHelpTab('contact')">💬 Contact</button>
+                    <button class="settings-tab" data-tab="guides" onclick="switchHelpTab('guides')">📖 Guides</button>
+                    <button class="settings-tab" data-tab="feedback" onclick="switchHelpTab('feedback')">💡 Feedback</button>
+                    <button class="settings-tab" data-tab="education" onclick="switchHelpTab('education')">🏥 Health Ed</button>
+                </div>
+
+                <!-- ═══ TAB: FAQ ═══ -->
+                <div class="settings-panel active" id="help-faq">
+                    <div class="settings-section">
+                        <h2>Frequently Asked Questions</h2>
+                        <div class="faq-categories">
+                            <button class="faq-cat-btn active" onclick="filterFAQCategory('all', this)">All</button>
+                            <button class="faq-cat-btn" onclick="filterFAQCategory('account', this)">Account</button>
+                            <button class="faq-cat-btn" onclick="filterFAQCategory('health', this)">Health</button>
+                            <button class="faq-cat-btn" onclick="filterFAQCategory('appointments', this)">Appointments</button>
+                            <button class="faq-cat-btn" onclick="filterFAQCategory('general', this)">General</button>
+                        </div>
+                        <div class="faq-list" id="faqList">
+                            <!-- Built-in FAQ items -->
+                            <div class="faq-item" data-category="account"><div class="faq-question" onclick="toggleFAQ(this)"><span>How do I update my profile information?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Go to <strong>Settings → Profile</strong> tab. You can update your name, phone, date of birth, gender, blood type, height, and emergency contact details. Click "Save Profile" when done.</div></div>
+                            <div class="faq-item" data-category="account"><div class="faq-question" onclick="toggleFAQ(this)"><span>How do I change my password?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Navigate to <strong>Settings → Privacy & Security</strong> tab. Enter your current password and your new password (minimum 6 characters), then click "Update Password".</div></div>
+                            <div class="faq-item" data-category="health"><div class="faq-question" onclick="toggleFAQ(this)"><span>How do I log my daily health data?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">From the <strong>Dashboard</strong>, click the "+ Add Health Data" button. Enter your heart rate, blood pressure, weight, temperature, and any notes. The data will be saved and analyzed by our AI.</div></div>
+                            <div class="faq-item" data-category="health"><div class="faq-question" onclick="toggleFAQ(this)"><span>What do the vital sign thresholds mean?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Thresholds define what's "normal" for you. In <strong>Settings → Health Preferences</strong>, you can customize the min/max ranges for heart rate, blood pressure, and temperature. Values outside these ranges will trigger warnings.</div></div>
+                            <div class="faq-item" data-category="appointments"><div class="faq-question" onclick="toggleFAQ(this)"><span>How do I book an appointment?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Go to the <strong>Appointments</strong> page from the sidebar. Click "Book Appointment", fill in the doctor name, specialization, date, and reason. You'll receive a confirmation and reminders.</div></div>
+                            <div class="faq-item" data-category="appointments"><div class="faq-question" onclick="toggleFAQ(this)"><span>Can I cancel an appointment?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Yes! Go to the <strong>Appointments</strong> page, find your appointment in the list, and click the "Cancel" button. Cancelled appointments will be marked accordingly.</div></div>
+                            <div class="faq-item" data-category="general"><div class="faq-question" onclick="toggleFAQ(this)"><span>Is my health data secure?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Absolutely. We use encrypted connections (HTTPS), JWT authentication, and secure password hashing (bcrypt). Your data is stored locally in an encrypted database and is never shared with third parties.</div></div>
+                            <div class="faq-item" data-category="general"><div class="faq-question" onclick="toggleFAQ(this)"><span>How do I export my health data?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">You have two options: <strong>1)</strong> From the Dashboard, click "Export Report" for a CSV of recent data. <strong>2)</strong> From Settings → Privacy, click "Download Your Data" for a complete JSON export of all your information.</div></div>
+                            <div class="faq-item" data-category="general"><div class="faq-question" onclick="toggleFAQ(this)"><span>What AI features are available?</span><span class="faq-arrow">▼</span></div><div class="faq-answer">Our AI provides: <strong>Health Insights</strong> (personalized recommendations based on your vitals), <strong>Diet Plans</strong> (nutrition suggestions), <strong>Exercise Recommendations</strong>, and an <strong>AI Chatbot</strong> for health-related questions.</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ TAB: CONTACT SUPPORT ═══ -->
+                <div class="settings-panel" id="help-contact">
+                    <div class="settings-section">
+                        <h2>Contact Support</h2>
+                        <p class="settings-desc">Need help? Submit a ticket and we'll get back to you within 24 hours.</p>
+                        <div class="contact-form">
+                            <div class="settings-grid">
+                                <div class="form-group"><label for="ticketCategory">Category</label>
+                                    <select id="ticketCategory"><option value="general">General Inquiry</option><option value="bug">Bug Report</option><option value="feature">Feature Request</option><option value="billing">Billing</option><option value="account">Account Issue</option></select>
+                                </div>
+                                <div class="form-group"><label for="ticketPriority">Priority</label>
+                                    <select id="ticketPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+                                </div>
+                            </div>
+                            <div class="form-group"><label for="ticketSubject">Subject</label><input type="text" id="ticketSubject" placeholder="Brief description of your issue"></div>
+                            <div class="form-group"><label for="ticketMessage">Message</label><textarea id="ticketMessage" rows="5" placeholder="Describe your issue in detail..."></textarea></div>
+                            <button class="btn btn-primary" onclick="submitTicket()">📨 Submit Ticket</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Your Support Tickets</h2>
+                        <div id="ticketsList" class="tickets-list"><p class="empty-state">Loading tickets...</p></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Other Ways to Reach Us</h2>
+                        <div class="contact-cards">
+                            <div class="contact-card"><div class="contact-card-icon">📧</div><h3>Email Support</h3><p>support@healthai.com</p><span class="contact-sla">Response within 24 hours</span></div>
+                            <div class="contact-card"><div class="contact-card-icon">📞</div><h3>Phone Support</h3><p>+91 1800-XXX-XXXX</p><span class="contact-sla">Mon-Fri, 9 AM - 6 PM IST</span></div>
+                            <div class="contact-card"><div class="contact-card-icon">💬</div><h3>Live Chat</h3><p>Chat with our AI assistant</p><span class="contact-sla">Available 24/7</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ TAB: GUIDES ═══ -->
+                <div class="settings-panel" id="help-guides">
+                    <div class="settings-section">
+                        <h2>How-To Guides</h2>
+                        <div class="guides-grid">
+                            <div class="guide-card" onclick="window.location.href='health-tracking.html'"><div class="guide-icon">💓</div><h3>Track Your Vitals</h3><p>Learn how to log heart rate, blood pressure, weight and more</p><span class="guide-link">Read Guide →</span></div>
+                            <div class="guide-card" onclick="window.location.href='appointments.html'"><div class="guide-icon">📅</div><h3>Book Appointments</h3><p>Schedule, manage and track your doctor appointments</p><span class="guide-link">Read Guide →</span></div>
+                            <div class="guide-card" onclick="window.location.href='diet-suggestions.html'"><div class="guide-icon">🥗</div><h3>Get Diet Plans</h3><p>Get personalized nutrition and diet recommendations</p><span class="guide-link">Read Guide →</span></div>
+                            <div class="guide-card" onclick="window.location.href='exercise.html'"><div class="guide-icon">🏃</div><h3>Exercise Routines</h3><p>AI-powered exercise plans matching your fitness level</p><span class="guide-link">Read Guide →</span></div>
+                            <div class="guide-card" onclick="window.location.href='reports.html'"><div class="guide-icon">📋</div><h3>Upload Reports</h3><p>Upload and manage your medical reports and lab results</p><span class="guide-link">Read Guide →</span></div>
+                            <div class="guide-card" onclick="window.location.href='settings.html'"><div class="guide-icon">⚙️</div><h3>Manage Settings</h3><p>Configure your profile, preferences and notifications</p><span class="guide-link">Read Guide →</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ TAB: FEEDBACK ═══ -->
+                <div class="settings-panel" id="help-feedback">
+                    <div class="settings-section">
+                        <h2>Share Your Feedback</h2>
+                        <p class="settings-desc">Help us improve! Your feedback shapes the future of HealthAI.</p>
+                        <div class="form-group"><label for="feedbackType">Feedback Type</label>
+                            <select id="feedbackType"><option value="suggestion">Suggestion</option><option value="compliment">Compliment</option><option value="issue">Issue</option><option value="feature">Feature Request</option></select>
+                        </div>
+                        <div class="form-group"><label for="feedbackMsg">Your Feedback</label><textarea id="feedbackMsg" rows="5" placeholder="Tell us what you think..."></textarea></div>
+                        <button class="btn btn-primary" onclick="submitFeedback()">📩 Submit Feedback</button>
+                    </div>
+                </div>
+
+                <!-- ═══ TAB: HEALTH EDUCATION ═══ -->
+                <div class="settings-panel" id="help-education">
+                    <div class="settings-section">
+                        <h2>Health Education Resources</h2>
+                        <div class="edu-grid">
+                            <div class="edu-card"><div class="edu-card-badge nutrition">Nutrition</div><h3>Understanding Balanced Diet</h3><p>Learn about macronutrients, micronutrients, and how to create a balanced meal plan for optimal health.</p><div class="edu-tips"><strong>Key Tips:</strong><ul><li>Fill half your plate with vegetables</li><li>Choose whole grains over refined</li><li>Include lean protein in every meal</li><li>Stay hydrated — 8 glasses of water daily</li></ul></div></div>
+                            <div class="edu-card"><div class="edu-card-badge fitness">Fitness</div><h3>Exercise for Better Health</h3><p>Regular physical activity reduces the risk of chronic diseases and improves mental health.</p><div class="edu-tips"><strong>Recommended:</strong><ul><li>150 minutes of moderate exercise/week</li><li>Strength training 2-3 times/week</li><li>Stretch before and after exercise</li><li>Start slow and gradually increase intensity</li></ul></div></div>
+                            <div class="edu-card"><div class="edu-card-badge mental">Mental Health</div><h3>Managing Stress & Anxiety</h3><p>Mental health is just as important as physical health. Learn techniques for stress management.</p><div class="edu-tips"><strong>Practices:</strong><ul><li>Practice mindfulness meditation daily</li><li>Maintain a regular sleep schedule</li><li>Connect with friends and family</li><li>Limit screen time before bed</li></ul></div></div>
+                            <div class="edu-card"><div class="edu-card-badge vitals">Heart Health</div><h3>Understanding Your Vitals</h3><p>Know what your numbers mean and when to seek medical attention.</p><div class="edu-tips"><strong>Normal Ranges:</strong><ul><li>Heart Rate: 60-100 bpm (resting)</li><li>Blood Pressure: &lt;120/80 mmHg</li><li>Temperature: 36.1-37.2°C</li><li>BMI: 18.5-24.9 (normal weight)</li></ul></div></div>
+                            <div class="edu-card"><div class="edu-card-badge sleep">Sleep Health</div><h3>Quality Sleep Guide</h3><p>Sleep is essential for recovery, cognitive function and overall well-being.</p><div class="edu-tips"><strong>Sleep Hygiene:</strong><ul><li>Aim for 7-9 hours per night</li><li>Keep a consistent sleep schedule</li><li>Avoid caffeine 6 hours before bed</li><li>Create a dark, cool sleeping environment</li></ul></div></div>
+                            <div class="edu-card"><div class="edu-card-badge prevention">Prevention</div><h3>Preventive Healthcare</h3><p>Regular check-ups and screenings can catch health issues early.</p><div class="edu-tips"><strong>Regular Check-ups:</strong><ul><li>Annual physical exam</li><li>Blood work every 6-12 months</li><li>Dental check-up every 6 months</li><li>Eye exam annually</li></ul></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/help.js"></script>
+</body>
+</html>

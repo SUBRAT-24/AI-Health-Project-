@@ -7,9 +7,13 @@
 // CONFIGURATION
 // ========================
 
-const API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:')
-    ? (window.location.origin + '/api')
-    : 'http://127.0.0.1:5000/api';
+// Use the global API_BASE_URL set by api-config.js (loaded before this file)
+// Fallback to same-origin if api-config.js wasn't loaded
+if (typeof API_BASE_URL === 'undefined') {
+    var API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:')
+        ? (window.location.origin + '/api')
+        : 'http://127.0.0.1:5000/api';
+}
 
 // ========================
 // UTILITY FUNCTIONS
@@ -84,24 +88,29 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
         if (response.status === 401 || response.status === 422) {
-            // 401 = missing/unauthorized, 422 = invalid token (JWT malformed/expired)
-            console.error('Auth failed:', response.status);
-            localStorage.removeItem('userToken');
-            localStorage.removeItem('userData');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userRole');
-            let errMsg = 'Session invalid or expired. Please log in again.';
-            try {
-                const err = await response.json();
-                errMsg = err.msg || err.error || err.message || errMsg;
-            } catch (_) {}
-            showToast(errMsg, 'error');
-            const base = window.location.pathname.includes('/pages/') ? '' : 'pages/';
-            const isAdmin = window.location.pathname.includes('admin');
-            setTimeout(function () {
-                window.location.href = base + (isAdmin ? 'admin-login.html' : 'login.html');
-            }, 1500);
-            return null;
+            // For auth endpoints (login/signup), 401 means bad credentials, not expired session
+            const isAuthEndpoint = endpoint.startsWith('/auth/login') || endpoint.startsWith('/auth/signup');
+            if (!isAuthEndpoint) {
+                // 401 = missing/unauthorized, 422 = invalid token (JWT malformed/expired)
+                console.error('Auth failed:', response.status);
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userRole');
+                let errMsg = 'Session invalid or expired. Please log in again.';
+                try {
+                    const err = await response.json();
+                    errMsg = err.msg || err.error || err.message || errMsg;
+                } catch (_) {}
+                showToast(errMsg, 'error');
+                const base = window.location.pathname.includes('/pages/') ? '' : 'pages/';
+                const isAdmin = window.location.pathname.includes('admin');
+                setTimeout(function () {
+                    window.location.href = base + (isAdmin ? 'admin-login.html' : 'login.html');
+                }, 1500);
+                return null;
+            }
+            // For auth endpoints, fall through to the normal !response.ok handler below
         }
 
         if (!response.ok) {
@@ -116,7 +125,14 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         return await response.json();
     } catch (error) {
         console.error('API Error:', error);
-        showToast(error.message || 'An error occurred', 'error');
+        // Provide user-friendly messages for common issues
+        let msg = error.message || 'An error occurred';
+        if (error.message && error.message.includes('Failed to fetch')) {
+            msg = 'Cannot connect to server. Please make sure the backend is running (python run_backend.py).';
+        } else if (error.message && error.message.includes('HTTP 405')) {
+            msg = 'Cannot connect to server. The backend may not be running.';
+        }
+        showToast(msg, 'error');
         throw error;
     }
 }
@@ -376,9 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
  */
 async function testAPIConnectivity() {
     try {
-        const base = (typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:')
-            ? (window.location.origin + '/api') : 'http://127.0.0.1:5000/api';
-        const response = await fetch(base + '/health/test');
+        const response = await fetch(API_BASE_URL + '/health/test');
         const data = await response.json();
         console.log('✓ API Test Result:', data);
 

@@ -1,9 +1,12 @@
 /**
  * Admin panel - API and UI helpers
  */
-const API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:')
-    ? (window.location.origin + '/api')
-    : 'http://127.0.0.1:5000/api';
+// Use global API_BASE_URL from api-config.js; fallback for safety
+if (typeof API_BASE_URL === 'undefined') {
+    var API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.protocol !== 'file:')
+        ? (window.location.origin + '/api')
+        : 'http://127.0.0.1:5000/api';
+}
 
 function getToken() {
     return localStorage.getItem('userToken');

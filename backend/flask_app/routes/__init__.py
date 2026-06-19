@@ -11,6 +11,7 @@ from . import exercise
 from . import reports
 from . import chatbot
 from . import admin
+from . import settings
 
 __all__ = [
     'auth',
@@ -20,5 +21,7 @@ __all__ = [
     'exercise',
     'reports',
     'chatbot',
-    'admin'
+    'admin',
+    'settings'
 ]
+

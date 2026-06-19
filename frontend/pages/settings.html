@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Health Assistant</title>
+    <meta name="description" content="Manage your profile, health preferences, notifications, privacy and personalization settings.">
+    <link rel="stylesheet" href="../css/dashboard-new.css">
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+<body>
+    <div class="app-layout">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🏥</div>
+                <span class="sidebar-brand-name">HealthAI</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-title">Menu</div>
+                <a href="dashboard.html" class="sidebar-link" id="navDashboard"><span class="sidebar-icon">📊</span> Dashboard</a>
+                <a href="appointments.html" class="sidebar-link" id="navAppointments"><span class="sidebar-icon">📅</span> Appointments</a>
+                <a href="health-tracking.html" class="sidebar-link" id="navHealth"><span class="sidebar-icon">💓</span> Health Tracking</a>
+                <a href="diet-suggestions.html" class="sidebar-link" id="navDiet"><span class="sidebar-icon">🥗</span> Diet Plans</a>
+                <a href="exercise.html" class="sidebar-link" id="navExercise"><span class="sidebar-icon">🏃</span> Exercise</a>
+                <a href="reports.html" class="sidebar-link" id="navReports"><span class="sidebar-icon">📋</span> Reports</a>
+                <div class="sidebar-section-title">General</div>
+                <a href="settings.html" class="sidebar-link active" id="navSettings"><span class="sidebar-icon">⚙️</span> Settings</a>
+                <a href="help.html" class="sidebar-link" id="navHelp"><span class="sidebar-icon">❓</span> Help</a>
+                <a href="#" class="sidebar-link" id="navLogout" onclick="window.healthAssistant.logoutUser()"><span class="sidebar-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content">
+            <header class="topbar">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+                    <div class="topbar-search">
+                        <span class="topbar-search-icon">🔍</span>
+                        <input type="text" placeholder="Search settings..." id="settingsSearch">
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="topbar-user" id="userDropdown">
+                        <div class="topbar-avatar" id="userAvatar">U</div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name" id="topbarUserName">User</span>
+                            <span class="topbar-user-email" id="topbarUserEmail">user@health.com</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1>⚙️ Settings</h1>
+                        <p>Manage your account, preferences and personalization</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary" id="saveAllBtn" onclick="saveAllSettings()">💾 Save All Changes</button>
+                    </div>
+                </div>
+
+                <!-- Settings Navigation Tabs -->
+                <div class="settings-tabs" id="settingsTabs">
+                    <button class="settings-tab active" data-tab="profile" onclick="switchSettingsTab('profile')">👤 Profile</button>
+                    <button class="settings-tab" data-tab="health" onclick="switchSettingsTab('health')">💓 Health</button>
+                    <button class="settings-tab" data-tab="notifications" onclick="switchSettingsTab('notifications')">🔔 Notifications</button>
+                    <button class="settings-tab" data-tab="privacy" onclick="switchSettingsTab('privacy')">🔒 Privacy</button>
+                    <button class="settings-tab" data-tab="preferences" onclick="switchSettingsTab('preferences')">🎨 Preferences</button>
+                </div>
+
+                <!-- ═══ TAB: PROFILE ═══ -->
+                <div class="settings-panel active" id="panel-profile">
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <h2>Personal Information</h2>
+                            <span class="settings-updated" id="profileUpdated"></span>
+                        </div>
+                        <div class="settings-grid">
+                            <div class="form-group"><label for="settName">Full Name</label><input type="text" id="settName" placeholder="Your full name"></div>
+                            <div class="form-group"><label for="settEmail">Email Address</label><input type="email" id="settEmail" placeholder="you@example.com" disabled></div>
+                            <div class="form-group"><label for="settPhone">Phone Number</label><input type="tel" id="settPhone" placeholder="+91 XXXXX XXXXX"></div>
+                            <div class="form-group"><label for="settDob">Date of Birth</label><input type="date" id="settDob"></div>
+                            <div class="form-group"><label for="settGender">Gender</label>
+                                <select id="settGender"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+                            </div>
+                            <div class="form-group"><label for="settBloodType">Blood Type</label>
+                                <select id="settBloodType"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
+                            </div>
+                            <div class="form-group"><label for="settHeight">Height (cm)</label><input type="number" id="settHeight" placeholder="e.g. 175" min="50" max="250"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Emergency Contact</h2>
+                        <div class="settings-grid">
+                            <div class="form-group"><label for="settEmName">Contact Name</label><input type="text" id="settEmName" placeholder="Emergency contact name"></div>
+                            <div class="form-group"><label for="settEmPhone">Contact Phone</label><input type="tel" id="settEmPhone" placeholder="+91 XXXXX XXXXX"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Medical Information</h2>
+                        <div class="form-group"><label for="settAllergies">Allergies</label><textarea id="settAllergies" rows="2" placeholder="List any known allergies..."></textarea></div>
+                        <div class="form-group"><label for="settMedHistory">Medical History</label><textarea id="settMedHistory" rows="3" placeholder="Any relevant medical history..."></textarea></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Account Info</h2>
+                        <div class="account-info-grid">
+                            <div class="account-info-item"><span class="account-info-label">Account Created</span><span class="account-info-value" id="accountCreated">--</span></div>
+                            <div class="account-info-item"><span class="account-info-label">Last Updated</span><span class="account-info-value" id="accountUpdated">--</span></div>
+                            <div class="account-info-item"><span class="account-info-label">Role</span><span class="account-info-value" id="accountRole">User</span></div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+                </div>
+
+                <!-- ═══ TAB: HEALTH PREFERENCES ═══ -->
+                <div class="settings-panel" id="panel-health">
+                    <div class="settings-section">
+                        <h2>Vital Sign Thresholds</h2>
+                        <p class="settings-desc">Customize Normal/Warning/Critical ranges for your vital signs</p>
+                        <div class="threshold-grid">
+                            <div class="threshold-card">
+                                <div class="threshold-icon">💓</div>
+                                <div class="threshold-label">Heart Rate (bpm)</div>
+                                <div class="threshold-inputs">
+                                    <div class="form-group"><label>Min</label><input type="number" id="thrHrMin" value="60"></div>
+                                    <span class="threshold-sep">—</span>
+                                    <div class="form-group"><label>Max</label><input type="number" id="thrHrMax" value="100"></div>
+                                </div>
+                            </div>
+                            <div class="threshold-card">
+                                <div class="threshold-icon">🩺</div>
+                                <div class="threshold-label">BP Systolic (mmHg)</div>
+                                <div class="threshold-inputs">
+                                    <div class="form-group"><label>Min</label><input type="number" id="thrBpSysMin" value="90"></div>
+                                    <span class="threshold-sep">—</span>
+                                    <div class="form-group"><label>Max</label><input type="number" id="thrBpSysMax" value="140"></div>
+                                </div>
+                            </div>
+                            <div class="threshold-card">
+                                <div class="threshold-icon">🩺</div>
+                                <div class="threshold-label">BP Diastolic (mmHg)</div>
+                                <div class="threshold-inputs">
+                                    <div class="form-group"><label>Min</label><input type="number" id="thrBpDiaMin" value="60"></div>
+                                    <span class="threshold-sep">—</span>
+                                    <div class="form-group"><label>Max</label><input type="number" id="thrBpDiaMax" value="90"></div>
+                                </div>
+                            </div>
+                            <div class="threshold-card">
+                                <div class="threshold-icon">🌡️</div>
+                                <div class="threshold-label">Temperature (°C)</div>
+                                <div class="threshold-inputs">
+                                    <div class="form-group"><label>Min</label><input type="number" id="thrTempMin" value="36.0" step="0.1"></div>
+                                    <span class="threshold-sep">—</span>
+                                    <div class="form-group"><label>Max</label><input type="number" id="thrTempMax" value="37.5" step="0.1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Daily Health Goals</h2>
+                        <div class="goals-grid">
+                            <div class="goal-card"><div class="goal-icon">🚶</div><label for="goalSteps">Daily Steps</label><input type="number" id="goalSteps" value="10000" min="1000" step="500"></div>
+                            <div class="goal-card"><div class="goal-icon">💧</div><label for="goalWater">Water (glasses)</label><input type="number" id="goalWater" value="8" min="1" max="20"></div>
+                            <div class="goal-card"><div class="goal-icon">😴</div><label for="goalSleep">Sleep (hours)</label><input type="number" id="goalSleep" value="8" min="4" max="12"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Measurement Units</h2>
+                        <div class="form-group"><label for="settUnits">Preferred Units</label>
+                            <select id="settUnits"><option value="metric">Metric (kg, cm, °C)</option><option value="imperial">Imperial (lbs, in, °F)</option></select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveHealthPreferences()">Save Health Preferences</button>
+                </div>
+
+                <!-- ═══ TAB: NOTIFICATIONS ═══ -->
+                <div class="settings-panel" id="panel-notifications">
+                    <div class="settings-section">
+                        <h2>Vital Sign Alerts</h2>
+                        <div class="toggle-row"><span>Enable vital sign alerts</span><label class="toggle"><input type="checkbox" id="toggleVitalAlerts" checked><span class="toggle-slider"></span></label></div>
+                        <div class="form-group" style="margin-top:1rem;"><label for="alertFreq">Alert Frequency</label>
+                            <select id="alertFreq"><option value="immediate">Immediate</option><option value="daily">Daily Summary</option><option value="weekly">Weekly Report</option></select>
+                        </div>
+                        <div class="form-group"><label for="notifMethod">Notification Method</label>
+                            <select id="notifMethod"><option value="dashboard">Dashboard Only</option><option value="email">Email</option><option value="sms">SMS</option></select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Appointment Reminders</h2>
+                        <div class="form-group"><label for="aptReminder">Remind me before appointment</label>
+                            <select id="aptReminder"><option value="24h">24 hours before</option><option value="1h">1 hour before</option><option value="30m">30 minutes before</option></select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Medicine Reminders</h2>
+                        <div class="toggle-row"><span>Enable medicine reminders</span><label class="toggle"><input type="checkbox" id="toggleMedReminder" checked><span class="toggle-slider"></span></label></div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveNotificationSettings()">Save Notification Settings</button>
+                </div>
+
+                <!-- ═══ TAB: PRIVACY & SECURITY ═══ -->
+                <div class="settings-panel" id="panel-privacy">
+
+                    <!-- Email Verification -->
+                    <div class="settings-section">
+                        <h2>📧 Email Verification</h2>
+                        <div class="verification-status" id="verificationStatus">
+                            <div class="verification-badge unverified" id="verifyBadge">
+                                <span class="verify-icon">⚠️</span>
+                                <span class="verify-text">Email not verified</span>
+                            </div>
+                        </div>
+                        <p class="settings-desc" id="verifyDesc">Verify your email to enable password reset and receive important notifications.</p>
+
+                        <!-- Step 1: Send Code -->
+                        <div id="verifyStep1">
+                            <button class="btn btn-primary" id="sendCodeBtn" onclick="sendVerificationCode()">📩 Send Verification Code</button>
+                        </div>
+
+                        <!-- Step 2: Enter Code (hidden initially) -->
+                        <div id="verifyStep2" style="display:none;">
+                            <div class="verify-code-form">
+                                <p class="verify-hint" id="verifyHint"></p>
+                                <div class="code-input-row">
+                                    <input type="text" id="verifyCodeInput" maxlength="6" placeholder="Enter 6-digit code" class="code-input">
+                                    <button class="btn btn-primary" onclick="verifyEmailCode()">✓ Verify</button>
+                                </div>
+                                <button class="btn btn-outline btn-sm" style="margin-top:.75rem;" onclick="sendVerificationCode()">Resend Code</button>
+                            </div>
+                        </div>
+
+                        <!-- Verified state (hidden initially) -->
+                        <div id="verifyDone" style="display:none;">
+                            <p style="color:var(--accent-green);font-weight:600;">Your email has been verified successfully.</p>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="settings-section">
+                        <h2>🔑 Change Password</h2>
+                        <div class="password-form">
+                            <div class="form-group"><label for="currentPass">Current Password</label><input type="password" id="currentPass" placeholder="Enter current password"></div>
+                            <div class="form-group"><label for="newPass">New Password</label><input type="password" id="newPass" placeholder="Enter new password (min 6 chars)"></div>
+                            <div class="form-group"><label for="confirmNewPass">Confirm New Password</label><input type="password" id="confirmNewPass" placeholder="Confirm new password"></div>
+                            <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+                        </div>
+                    </div>
+
+                    <!-- Reset Password via Email -->
+                    <div class="settings-section">
+                        <h2>🔄 Reset Password via Email</h2>
+                        <p class="settings-desc">Forgot your password or want to reset it via email? We'll send a secure reset link to your registered email address.</p>
+                        <div id="resetPasswordSection">
+                            <div class="form-group"><label for="resetEmail">Email Address</label><input type="email" id="resetEmail" placeholder="Enter your registered email"></div>
+                            <button class="btn btn-outline" onclick="requestPasswordReset()">📨 Send Reset Link</button>
+                            <p class="reset-hint" id="resetHint" style="display:none;margin-top:1rem;font-size:.85rem;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Data & Privacy -->
+                    <div class="settings-section">
+                        <h2>📂 Data & Privacy</h2>
+                        <div class="privacy-actions">
+                            <div class="privacy-action-card">
+                                <div class="privacy-action-info"><h3>📥 Download Your Data</h3><p>Export all your health data in JSON format (GDPR compliance)</p></div>
+                                <button class="btn btn-outline" onclick="exportAllData()">Download</button>
+                            </div>
+                            <div class="privacy-action-card">
+                                <div class="privacy-action-info"><h3>📄 Privacy Policy</h3><p>Read our privacy policy and terms of service</p></div>
+                                <button class="btn btn-outline" onclick="window.healthAssistant.showToast('Privacy policy page coming soon','info')">View</button>
+                            </div>
+                            <div class="privacy-action-card danger">
+                                <div class="privacy-action-info"><h3>🗑️ Delete Account</h3><p>Permanently deactivate your account and data</p></div>
+                                <button class="btn btn-danger" onclick="requestAccountDeletion()">Delete Account</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ═══ TAB: PREFERENCES ═══ -->
+                <div class="settings-panel" id="panel-preferences">
+                    <div class="settings-section">
+                        <h2>Appearance</h2>
+                        <div class="toggle-row"><span>🌙 Dark Mode</span><label class="toggle"><input type="checkbox" id="toggleDarkMode"><span class="toggle-slider"></span></label></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Language & Format</h2>
+                        <div class="settings-grid">
+                            <div class="form-group"><label for="settLang">Language</label>
+                                <select id="settLang"><option value="en">English</option><option value="hi">Hindi</option><option value="ta">Tamil</option><option value="te">Telugu</option><option value="kn">Kannada</option><option value="ml">Malayalam</option></select>
+                            </div>
+                            <div class="form-group"><label for="settDateFmt">Date Format</label>
+                                <select id="settDateFmt"><option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="MM/DD/YYYY">MM/DD/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option></select>
+                            </div>
+                            <div class="form-group"><label for="settTimezone">Timezone</label>
+                                <select id="settTimezone"><option value="Asia/Kolkata">India (IST)</option><option value="America/New_York">US Eastern</option><option value="America/Los_Angeles">US Pacific</option><option value="Europe/London">UK (GMT)</option><option value="Asia/Dubai">UAE</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Lifestyle</h2>
+                        <div class="settings-grid">
+                            <div class="form-group"><label for="settDiet">Dietary Preference</label>
+                                <select id="settDiet"><option value="non-veg">Non-Vegetarian</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="eggetarian">Eggetarian</option></select>
+                            </div>
+                            <div class="form-group"><label for="settFitness">Fitness Level</label>
+                                <select id="settFitness"><option value="sedentary">Sedentary</option><option value="moderate">Moderate</option><option value="active">Active</option><option value="athlete">Athlete</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="savePreferences()">Save Preferences</button>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/settings.js"></script>
+</body>
+</html>

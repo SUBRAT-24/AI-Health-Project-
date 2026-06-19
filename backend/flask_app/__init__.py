@@ -19,7 +19,13 @@ def create_flask_app():
     frontend_dir = os.path.join(project_root, 'frontend')
     uploads_dir  = os.path.join(project_root, 'uploads')
 
-    app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
+    # In production (Render), we don't serve frontend files — Vercel handles that.
+    # Only set static_folder if the frontend directory actually exists locally.
+    is_production = os.getenv('FLASK_ENV', 'development') == 'production'
+    if is_production:
+        app = Flask(__name__)
+    else:
+        app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
     app.url_map.strict_slashes = False
 
     # -------------------------------------------------------------------
@@ -52,8 +58,11 @@ def create_flask_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    # CORS – allow all origins for /api/* (for dev; tighten in production)
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    # CORS – In production, allow only the Vercel frontend URL.
+    # Set FRONTEND_URL env var on Render to your Vercel URL (e.g. https://your-app.vercel.app)
+    frontend_url = os.getenv('FRONTEND_URL', '*')
+    allowed_origins = [o.strip() for o in frontend_url.split(',')]
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
     # -------------------------------------------------------------------
     # Database & Blueprints (require app context)
@@ -61,7 +70,7 @@ def create_flask_app():
     with app.app_context():
         db.create_all()
 
-        from flask_app.routes import auth, health, appointments, diet, exercise, reports, chatbot, admin
+        from flask_app.routes import auth, health, appointments, diet, exercise, reports, chatbot, admin, settings
 
         app.register_blueprint(auth.bp)
         app.register_blueprint(health.bp)
@@ -71,6 +80,7 @@ def create_flask_app():
         app.register_blueprint(reports.bp)
         app.register_blueprint(chatbot.bp)
         app.register_blueprint(admin.bp)
+        app.register_blueprint(settings.bp)
 
     # -------------------------------------------------------------------
     # Upload folder
@@ -97,24 +107,26 @@ def create_flask_app():
         return jsonify({'status': 'healthy', 'message': 'AI Health Assistant API is running'}), 200
 
     # -------------------------------------------------------------------
-    # Static file serving (serve frontend)
+    # Static file serving (serve frontend — only in local development)
+    # In production, Vercel serves the frontend and Render only serves /api
     # -------------------------------------------------------------------
-    @app.route('/')
-    def serve_index():
-        return send_from_directory(app.static_folder, 'index.html')
-
-    @app.route('/<path:path>')
-    def serve_static(path):
-        # Never intercept API paths
-        if path.startswith('api/'):
-            return jsonify({'error': 'Not found'}), 404
-        full_path = os.path.join(app.static_folder, path)
-        if os.path.isfile(full_path):
-            return send_from_directory(app.static_folder, path)
-        # SPA fallback for routes without extensions
-        if '.' not in os.path.basename(path):
+    if not is_production:
+        @app.route('/')
+        def serve_index():
             return send_from_directory(app.static_folder, 'index.html')
-        return jsonify({'error': 'Not found'}), 404
+
+        @app.route('/<path:path>')
+        def serve_static(path):
+            # Never intercept API paths
+            if path.startswith('api/'):
+                return jsonify({'error': 'Not found'}), 404
+            full_path = os.path.join(app.static_folder, path)
+            if os.path.isfile(full_path):
+                return send_from_directory(app.static_folder, path)
+            # SPA fallback for routes without extensions
+            if '.' not in os.path.basename(path):
+                return send_from_directory(app.static_folder, 'index.html')
+            return jsonify({'error': 'Not found'}), 404
 
     return app
 

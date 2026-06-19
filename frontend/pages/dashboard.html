@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AI Health Assistant</title>
     <meta name="description" content="Monitor your health metrics, track progress, and get AI-powered insights from your personalized dashboard.">
@@ -52,11 +52,11 @@
 
                 <div class="sidebar-section-title">General</div>
 
-                <a href="#" class="sidebar-link" id="navSettings">
+                <a href="settings.html" class="sidebar-link" id="navSettings">
                     <span class="sidebar-icon">⚙️</span>
                     Settings
                 </a>
-                <a href="#" class="sidebar-link" id="navHelp">
+                <a href="help.html" class="sidebar-link" id="navHelp">
                     <span class="sidebar-icon">❓</span>
                     Help
                 </a>
@@ -449,17 +449,44 @@
     <!-- ===== CHATBOT ===== -->
     <div id="chatbot-container" class="chatbot-container" style="display: none;">
         <div class="chatbot-header">
-            <h3>🤖 Health Assistant</h3>
-            <button class="chatbot-close" onclick="toggleChatbot()">×</button>
+            <div class="chatbot-header-left">
+                <span class="chatbot-status-dot"></span>
+                <h3>🤖 HealthAI Assistant</h3>
+            </div>
+            <div class="chatbot-header-right">
+                <button class="chatbot-header-btn" onclick="clearChatHistory()" title="Clear chat">🗑️</button>
+                <button class="chatbot-close" onclick="toggleChatbot()">×</button>
+            </div>
         </div>
+
+        <!-- Suggestion chips -->
+        <div class="chatbot-suggestions" id="chatSuggestions"></div>
+
+        <!-- Messages area -->
         <div class="chatbot-messages" id="chatMessages"></div>
+
+        <!-- File preview -->
+        <div class="chatbot-file-preview" id="chatFilePreview" style="display:none;">
+            <div class="file-preview-content">
+                <img id="filePreviewImg" src="" alt="Preview" style="display:none;">
+                <span id="filePreviewName"></span>
+            </div>
+            <button class="file-preview-remove" onclick="removeFilePreview()">✕</button>
+        </div>
+
+        <!-- Input area -->
         <div class="chatbot-input">
+            <label class="chatbot-attach-btn" for="chatFileInput" title="Upload image or PDF">
+                📎
+                <input type="file" id="chatFileInput" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(event)">
+            </label>
             <input type="text" id="chatInput" placeholder="Ask me anything health-related..." autocomplete="off">
-            <button id="chatSendBtn" class="chat-send-btn">Send</button>
+            <button id="chatSendBtn" class="chat-send-btn">➤</button>
         </div>
     </div>
     <button id="chatbot-toggle" class="chatbot-toggle" onclick="toggleChatbot()">💬</button>
 
+    <script src="../js/api-config.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
     <script src="../js/chatbot.js"></script>

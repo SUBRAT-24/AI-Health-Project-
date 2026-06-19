@@ -1,0 +1,32 @@
+# render.yaml - Render Blueprint for AI Health Assistant Backend
+# See: https://docs.render.com/blueprint-spec
+
+services:
+  - type: web
+    name: ai-health-assistant-backend
+    runtime: python
+    region: oregon  # Change if needed (oregon, ohio, frankfurt, singapore)
+    plan: free      # Change to "starter" or "standard" for production
+
+    # Build & Start
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+
+    # Health Check
+    healthCheckPath: /api/healthcheck
+
+    # Environment Variables
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URI
+        value: sqlite:///instance/health_assistant.db
+      - key: PYTHON_VERSION
+        value: "3.11.6"
+      # Optional: Set your Vercel frontend URL for CORS
+      # - key: FRONTEND_URL
+      #   value: https://your-frontend.vercel.app

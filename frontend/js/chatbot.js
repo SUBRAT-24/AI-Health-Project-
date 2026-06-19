@@ -1,99 +1,156 @@
 /**
- * AI Health Assistant - Chatbot JavaScript
- * Full chatbot functionality with message history and AI responses
+ * AI Health Assistant - Chatbot (Gemini-Powered)
+ * Full chatbot with AI responses, image/file upload, suggestions, and markdown rendering
  */
 
 let chatHistory = [];
 let isLoading = false;
+let selectedFile = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    const chatToggle = document.getElementById('chatbot-toggle');
-    if (chatToggle) {
-        chatToggle.addEventListener('click', toggleChatbot);
-    }
-
     const chatInput = document.getElementById('chatInput');
     if (chatInput) {
         chatInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && !isLoading) {
-                sendChat();
-            }
+            if (e.key === 'Enter' && !isLoading) sendChat();
         });
     }
 
     const sendButton = document.getElementById('chatSendBtn');
-    if (sendButton) {
-        sendButton.addEventListener('click', sendChat);
-    }
+    if (sendButton) sendButton.addEventListener('click', sendChat);
 
-    // Load welcome message
-    addBotMessage("Hello! I'm your AI Health Assistant. Ask me about health tips, symptoms, diet, exercise, stress management, or anything wellness-related. How can I help?", true);
+    // Welcome message
+    addBotMessage("Hello! 👋 I'm **HealthAI**, your personal health assistant powered by AI.\n\nI can help with:\n• Health questions & symptoms\n• Diet & nutrition advice\n• Exercise recommendations\n• Analyze medical reports & images\n• Mental wellness tips\n\n📎 Upload an image or PDF for analysis!", true);
+
+    // Load suggestions
+    loadSuggestions();
 });
 
-/**
- * Toggle chatbot visibility
- */
-function toggleChatbot() {
-    const chatbotContainer = document.getElementById('chatbot-container');
-    if (chatbotContainer) {
-        const isVisible = chatbotContainer.style.display !== 'none';
-        chatbotContainer.style.display = isVisible ? 'none' : 'flex';
+// ─── SUGGESTIONS ────────────────────────────────────────────────────────────────
 
-        if (!isVisible) {
-            // Focus input when opened
-            setTimeout(() => {
-                const input = document.getElementById('chatInput');
-                if (input) input.focus();
-            }, 100);
-        }
+async function loadSuggestions() {
+    const container = document.getElementById('chatSuggestions');
+    if (!container) return;
+
+    const suggestions = [
+        { icon: '💓', text: 'Healthy heart rate?' },
+        { icon: '🥗', text: 'Healthy breakfast ideas' },
+        { icon: '🏃', text: 'Exercises for beginners' },
+        { icon: '😴', text: 'Better sleep tips' },
+        { icon: '💊', text: 'Manage blood pressure' },
+        { icon: '🧘', text: 'Stress relief techniques' },
+    ];
+
+    container.innerHTML = suggestions.map(s =>
+        `<button class="suggestion-chip" onclick="useSuggestion('${s.text}')">${s.icon} ${s.text}</button>`
+    ).join('');
+}
+
+function useSuggestion(text) {
+    const input = document.getElementById('chatInput');
+    if (input) {
+        input.value = text;
+        sendChat();
+    }
+    // Hide suggestions after first use
+    const container = document.getElementById('chatSuggestions');
+    if (container) container.style.display = 'none';
+}
+
+// ─── FILE HANDLING ──────────────────────────────────────────────────────────────
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+        window.healthAssistant && window.healthAssistant.showToast('Please upload an image (JPG, PNG) or PDF', 'error');
+        return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+        window.healthAssistant && window.healthAssistant.showToast('File size must be under 10MB', 'error');
+        return;
+    }
+
+    selectedFile = file;
+    showFilePreview(file);
+}
+
+function showFilePreview(file) {
+    const preview = document.getElementById('chatFilePreview');
+    const img = document.getElementById('filePreviewImg');
+    const name = document.getElementById('filePreviewName');
+    if (!preview) return;
+
+    preview.style.display = 'flex';
+    name.textContent = file.name;
+
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => { img.src = e.target.result; img.style.display = 'block'; };
+        reader.readAsDataURL(file);
+    } else {
+        img.style.display = 'none';
+        name.textContent = `📄 ${file.name}`;
     }
 }
 
-/**
- * Send chat message to backend
- */
+function removeFilePreview() {
+    selectedFile = null;
+    const preview = document.getElementById('chatFilePreview');
+    const img = document.getElementById('filePreviewImg');
+    const fileInput = document.getElementById('chatFileInput');
+    if (preview) preview.style.display = 'none';
+    if (img) { img.src = ''; img.style.display = 'none'; }
+    if (fileInput) fileInput.value = '';
+}
+
+// ─── SEND MESSAGE ───────────────────────────────────────────────────────────────
+
 async function sendChat() {
     const chatInput = document.getElementById('chatInput');
     const message = chatInput.value.trim();
 
-    if (!message || isLoading) return;
+    if (!message && !selectedFile) return;
+    if (isLoading) return;
 
-    // Clear input
     chatInput.value = '';
     chatInput.disabled = true;
 
-    // Add user message
-    addUserMessage(message);
+    // Hide suggestions
+    const sugContainer = document.getElementById('chatSuggestions');
+    if (sugContainer) sugContainer.style.display = 'none';
+
+    // Show user message
+    if (selectedFile && selectedFile.type.startsWith('image/')) {
+        addUserMessageWithImage(message || 'Analyze this image', selectedFile);
+    } else if (selectedFile) {
+        addUserMessage(`📄 ${selectedFile.name}${message ? '\n' + message : ''}`);
+    } else {
+        addUserMessage(message);
+    }
 
     try {
         isLoading = true;
-
-        // Show typing indicator
         const typingId = addTypingIndicator();
 
-        // Send to chatbot API
-        const response = await sendChatToAPI(message);
+        let response;
+        if (selectedFile) {
+            response = await sendFileToAPI(selectedFile, message || 'Please analyze this file and provide health insights.');
+            removeFilePreview();
+        } else {
+            response = await sendChatToAPI(message);
+        }
 
-        // Remove typing indicator
         removeTypingIndicator(typingId);
-
-        // Add bot response with typing animation
         addBotMessage(response, false);
 
-        // Store in history
-        chatHistory.push({
-            role: 'user',
-            message: message,
-            timestamp: new Date()
-        });
-        chatHistory.push({
-            role: 'bot',
-            message: response,
-            timestamp: new Date()
-        });
+        chatHistory.push({ role: 'user', message, timestamp: new Date() });
+        chatHistory.push({ role: 'bot', message: response, timestamp: new Date() });
 
     } catch (error) {
-        console.error('Error sending chat message:', error);
+        console.error('Chat error:', error);
         removeTypingIndicator();
         addBotMessage('Sorry, I encountered an error. Please try again.', false, true);
     } finally {
@@ -103,20 +160,17 @@ async function sendChat() {
     }
 }
 
-/**
- * Send message to backend API
- */
+// ─── API CALLS ──────────────────────────────────────────────────────────────────
+
 async function sendChatToAPI(message) {
     const token = localStorage.getItem('userToken');
     const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ message: message })
+        headers,
+        body: JSON.stringify({ message })
     });
 
     if (!response.ok) {
@@ -127,123 +181,138 @@ async function sendChatToAPI(message) {
     }
 
     const data = await response.json();
-    return data.response || data.reply || 'I didn\'t understand that. Could you clarify?';
+    return data.response || data.reply || "I didn't understand that. Could you clarify?";
 }
 
-/**
- * Add user message to chat
- */
+async function sendFileToAPI(file, message) {
+    const token = localStorage.getItem('userToken');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('message', message);
+
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/chatbot/analyze`, {
+        method: 'POST',
+        headers,
+        body: formData
+    });
+
+    if (!response.ok) {
+        if (response.status === 401 || response.status === 422) {
+            return 'Please log in to use file analysis.';
+        }
+        throw new Error(`API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.response || data.reply || "I couldn't analyze this file. Please try again.";
+}
+
+// ─── MESSAGE RENDERING ──────────────────────────────────────────────────────────
+
+function renderMarkdown(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^### (.*$)/gm, '<h4>$1</h4>')
+        .replace(/^## (.*$)/gm, '<h3 style="font-size:1rem;margin:.5rem 0 .25rem;">$1</h3>')
+        .replace(/^# (.*$)/gm, '<h3 style="font-size:1.1rem;margin:.5rem 0 .25rem;">$1</h3>')
+        .replace(/^[•\-] (.*$)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul style="padding-left:1.2rem;margin:.25rem 0;">$1</ul>')
+        .replace(/^\d+\. (.*$)/gm, '<li>$1</li>')
+        .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:.82rem;">$1</code>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+}
+
 function addUserMessage(message) {
     const messagesDiv = document.getElementById('chatMessages');
     if (!messagesDiv) return;
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message user-message';
-    messageDiv.style.animation = 'slideInUp 0.3s ease-out';
-
-    const content = document.createElement('div');
-    content.className = 'message-content';
-    content.innerHTML = `<p>${escapeHtml(message)}</p>`;
-
-    const time = document.createElement('div');
-    time.className = 'message-time';
-    time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    messageDiv.appendChild(content);
-    messageDiv.appendChild(time);
-    messagesDiv.appendChild(messageDiv);
-
-    // Auto scroll
+    const div = document.createElement('div');
+    div.className = 'message user-message';
+    div.style.animation = 'slideInUp 0.3s ease-out';
+    div.innerHTML = `
+        <div class="message-content"><p>${escapeHtml(message).replace(/\n/g, '<br>')}</p></div>
+        <div class="message-time">${timeNow()}</div>
+    `;
+    messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-/**
- * Add bot message to chat with typing animation
- */
+function addUserMessageWithImage(message, file) {
+    const messagesDiv = document.getElementById('chatMessages');
+    if (!messagesDiv) return;
+
+    const div = document.createElement('div');
+    div.className = 'message user-message';
+    div.style.animation = 'slideInUp 0.3s ease-out';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        div.innerHTML = `
+            <div class="message-content">
+                <img src="${e.target.result}" alt="Uploaded" style="max-width:100%;border-radius:8px;margin-bottom:.5rem;">
+                <p>${escapeHtml(message)}</p>
+            </div>
+            <div class="message-time">${timeNow()}</div>
+        `;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+    reader.readAsDataURL(file);
+    messagesDiv.appendChild(div);
+}
+
 function addBotMessage(message, isWelcome = false, isError = false) {
     const messagesDiv = document.getElementById('chatMessages');
     if (!messagesDiv) return;
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = isError ? 'message bot-message error' : 'message bot-message';
-    messageDiv.style.animation = 'slideInUp 0.3s ease-out';
+    const div = document.createElement('div');
+    div.className = isError ? 'message bot-message error' : 'message bot-message';
+    div.style.animation = 'slideInUp 0.3s ease-out';
 
-    const content = document.createElement('div');
-    content.className = 'message-content';
+    const formattedMessage = renderMarkdown(message);
 
-    // Format message with line breaks
-    const formattedMessage = message
-        .replace(/\n/g, '<br>')
-        .replace(/\(\d\)/g, '<strong>$&</strong>');
-
-    content.innerHTML = `<p>${formattedMessage}</p>`;
-
-    const time = document.createElement('div');
-    time.className = 'message-time';
-    time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    messageDiv.appendChild(content);
-    messageDiv.appendChild(time);
-    messagesDiv.appendChild(messageDiv);
-
-    // Auto scroll
-    setTimeout(() => {
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }, 100);
-
-    return content;
+    div.innerHTML = `
+        <div class="message-content"><p>${formattedMessage}</p></div>
+        <div class="message-time">${timeNow()}</div>
+    `;
+    messagesDiv.appendChild(div);
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 100);
 }
 
-/**
- * Add typing indicator
- */
 function addTypingIndicator() {
     const messagesDiv = document.getElementById('chatMessages');
     if (!messagesDiv) return null;
 
-    const indicatorDiv = document.createElement('div');
-    indicatorDiv.className = 'message bot-message typing';
-    indicatorDiv.id = 'typing-indicator';
-    indicatorDiv.style.animation = 'slideInUp 0.3s ease-out';
-
-    const content = document.createElement('div');
-    content.className = 'message-content';
-    content.innerHTML = '<div class="typing-animation"><span></span><span></span><span></span></div>';
-
-    indicatorDiv.appendChild(content);
-    messagesDiv.appendChild(indicatorDiv);
+    const div = document.createElement('div');
+    div.className = 'message bot-message typing';
+    div.id = 'typing-indicator';
+    div.style.animation = 'slideInUp 0.3s ease-out';
+    div.innerHTML = '<div class="message-content"><div class="typing-animation"><span></span><span></span><span></span></div></div>';
+    messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
     return 'typing-indicator';
 }
 
-/**
- * Remove typing indicator
- */
 function removeTypingIndicator(id = 'typing-indicator') {
-    const indicator = document.getElementById(id || 'typing-indicator');
-    if (indicator) {
-        indicator.remove();
-    }
+    const el = document.getElementById(id || 'typing-indicator');
+    if (el) el.remove();
 }
 
-/**
- * Escape HTML special characters
- */
+// ─── UTILITIES ──────────────────────────────────────────────────────────────────
+
 function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-/**
- * Clear chat history
- */
+function timeNow() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 function clearChatHistory() {
     const messagesDiv = document.getElementById('chatMessages');
     if (messagesDiv) {
@@ -251,9 +320,31 @@ function clearChatHistory() {
         chatHistory = [];
         addBotMessage("Chat cleared. How can I help you today?", true);
     }
+    // Also clear server-side history
+    const token = localStorage.getItem('userToken');
+    if (token) {
+        fetch(`${API_BASE_URL}/chatbot/clear`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(() => {});
+    }
+    // Show suggestions again
+    const sug = document.getElementById('chatSuggestions');
+    if (sug) { sug.style.display = 'flex'; loadSuggestions(); }
 }
 
 // Export to global
 window.sendChat = sendChat;
 window.clearChatHistory = clearChatHistory;
 window.toggleChatbot = toggleChatbot;
+window.handleFileSelect = handleFileSelect;
+window.removeFilePreview = removeFilePreview;
+window.useSuggestion = useSuggestion;
+
+// Keyboard shortcut (Alt+C to toggle)
+document.addEventListener('keydown', function (e) {
+    if (e.altKey && e.key === 'c') {
+        e.preventDefault();
+        toggleChatbot();
+    }
+});
