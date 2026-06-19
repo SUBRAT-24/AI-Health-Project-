@@ -14,7 +14,7 @@
     // ─── PRODUCTION BACKEND URL ─────────────────────────────────────────────────
     // Replace this with your actual Render backend URL after deploying
     // Example: 'https://ai-health-assistant-backend.onrender.com'
-    const RENDER_BACKEND_URL = 'YOUR_RENDER_BACKEND_URL';  // <-- UPDATE THIS AFTER DEPLOYING BACKEND
+    const RENDER_BACKEND_URL = 'https://ai-health-project-t1es.onrender.com';
     // ────────────────────────────────────────────────────────────────────────────
 
     function getApiBaseUrl() {
