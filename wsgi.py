@@ -43,6 +43,25 @@ app = create_flask_app()
 # Ensure tables exist on startup
 with app.app_context():
     db.create_all()
+    # Auto-create default admin if it doesn't exist
+    from flask_app.models import User
+    from datetime import datetime, timezone
+    admin_email = 'admin@healthassistant.com'
+    existing = User.query.filter_by(email=admin_email).first()
+    if not existing:
+        admin_user = User(
+            email=admin_email,
+            name='Admin',
+            phone='0000000000',
+            date_of_birth=datetime.now(timezone.utc).date(),
+            gender='other',
+            role='admin',
+            is_active=True
+        )
+        admin_user.set_password('admin123')
+        db.session.add(admin_user)
+        db.session.commit()
+        print(f'[AUTO] Admin user created: {admin_email}')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
