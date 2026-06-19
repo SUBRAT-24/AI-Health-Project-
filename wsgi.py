@@ -25,6 +25,15 @@ backend_path = os.path.join(project_root, 'backend')
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
+# ─── Ensure instance directory exists & set absolute DB path ──────────────────
+instance_dir = os.path.join(project_root, 'instance')
+os.makedirs(instance_dir, exist_ok=True)
+
+# Force an absolute SQLite path so it works on Render's filesystem
+if not os.environ.get('DATABASE_URI') or 'sqlite' in os.environ.get('DATABASE_URI', ''):
+    abs_db_path = os.path.join(instance_dir, 'health_assistant.db')
+    os.environ['DATABASE_URI'] = f'sqlite:///{abs_db_path}'
+
 # ─── Create App ───────────────────────────────────────────────────────────────
 from flask_app import create_flask_app
 from flask_app.models import db
