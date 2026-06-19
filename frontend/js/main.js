@@ -128,9 +128,9 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         // Provide user-friendly messages for common issues
         let msg = error.message || 'An error occurred';
         if (error.message && error.message.includes('Failed to fetch')) {
-            msg = 'Cannot connect to server. Please make sure the backend is running (python run_backend.py).';
+            msg = 'Cannot connect to server. The server may be waking up — please wait a moment and try again.';
         } else if (error.message && error.message.includes('HTTP 405')) {
-            msg = 'Cannot connect to server. The backend may not be running.';
+            msg = 'Cannot connect to server. Please try again in a moment.';
         }
         showToast(msg, 'error');
         throw error;
