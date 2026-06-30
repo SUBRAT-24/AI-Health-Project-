@@ -25,7 +25,7 @@ async function adminRequest(endpoint, method = 'GET', body = null) {
         localStorage.removeItem('userName');
         localStorage.removeItem('userRole');
         const base = (typeof window !== 'undefined' && window.location.pathname && window.location.pathname.includes('/pages/')) ? '' : 'pages/';
-        window.location.href = base + 'admin-login.html';
+        window.location.href = base + 'login.html';
         throw new Error('Session expired');
     }
     if (!res.ok) {

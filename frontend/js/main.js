@@ -106,7 +106,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
                 const base = window.location.pathname.includes('/pages/') ? '' : 'pages/';
                 const isAdmin = window.location.pathname.includes('admin');
                 setTimeout(function () {
-                    window.location.href = base + (isAdmin ? 'admin-login.html' : 'login.html');
+                    window.location.href = base + 'login.html';
                 }, 1500);
                 return null;
             }

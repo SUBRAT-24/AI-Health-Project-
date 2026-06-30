@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 import os
@@ -115,10 +115,13 @@ def create_flask_app():
         def serve_index():
             return send_from_directory(app.static_folder, 'index.html')
 
-        @app.route('/<path:path>')
+        @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
         def serve_static(path):
             # Never intercept API paths
             if path.startswith('api/'):
+                return jsonify({'error': 'Not found'}), 404
+            # Only serve files for GET requests
+            if request.method != 'GET':
                 return jsonify({'error': 'Not found'}), 404
             full_path = os.path.join(app.static_folder, path)
             if os.path.isfile(full_path):

@@ -1330,60 +1330,7 @@ a {
     color: white;
 }
 
-/* Toggle (Login/Admin) */
-.auth-toggle-container {
-    display: flex;
-    background: var(--mint);
-    border-radius: 50px;
-    padding: 4px;
-    margin-bottom: 2rem;
-    position: relative;
-}
 
-.auth-toggle-btn {
-    flex: 1;
-    text-align: center;
-    padding: 0.65rem 1rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    border-radius: 50px;
-    transition: var(--transition-base);
-    z-index: 1;
-    color: var(--text-secondary);
-    border: none;
-    background: transparent;
-    user-select: none;
-}
-
-.auth-toggle-btn.active {
-    color: white;
-    background: var(--primary-green);
-    box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
-}
-
-.auth-toggle-btn:not(.active):hover {
-    color: var(--primary-green);
-}
-
-/* Admin mode accent */
-.auth-card.admin-mode .auth-toggle-btn.active {
-    background: linear-gradient(135deg, #FF6F00, #FF8F00);
-    box-shadow: 0 4px 15px rgba(255, 111, 0, 0.3);
-}
-
-.auth-card.admin-mode h2 { color: #FF6F00; }
-.auth-card.admin-mode .auth-submit-btn {
-    background: linear-gradient(135deg, #FF6F00, #FF8F00);
-}
-.auth-card.admin-mode .auth-submit-btn:hover {
-    background: linear-gradient(135deg, #E65100, #FF6F00);
-}
-.auth-card.admin-mode .form-group input:focus {
-    border-color: #FF6F00;
-    box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.12);
-}
 
 /* ========================
    MODAL

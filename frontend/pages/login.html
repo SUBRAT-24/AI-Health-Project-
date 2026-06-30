@@ -15,18 +15,8 @@
     <div class="auth-wrapper">
         <div>
             <div class="auth-card" id="loginCard">
-                <h2 id="loginTitle">🏥 Welcome Back</h2>
-                <p class="auth-subtitle" id="loginSubtitle">Sign in to your health dashboard</p>
-
-                <!-- Toggle: User / Admin -->
-                <div class="auth-toggle-container">
-                    <button class="auth-toggle-btn active" id="toggleUser" onclick="switchMode('user')">
-                        👤 User Login
-                    </button>
-                    <button class="auth-toggle-btn" id="toggleAdmin" onclick="switchMode('admin')">
-                        🛡️ Admin Login
-                    </button>
-                </div>
+                <h2>🏥 Welcome Back</h2>
+                <p class="auth-subtitle">Sign in to your health dashboard</p>
 
                 <form id="loginForm">
                     <div class="form-group">
@@ -80,35 +70,6 @@
     <script src="../js/api-config.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        let currentMode = 'user';
-
-        function switchMode(mode) {
-            currentMode = mode;
-            const card = document.getElementById('loginCard');
-            const toggleUser = document.getElementById('toggleUser');
-            const toggleAdmin = document.getElementById('toggleAdmin');
-            const title = document.getElementById('loginTitle');
-            const subtitle = document.getElementById('loginSubtitle');
-            const errEl = document.getElementById('loginError');
-
-            errEl.style.display = 'none';
-            errEl.textContent = '';
-
-            if (mode === 'admin') {
-                card.classList.add('admin-mode');
-                toggleAdmin.classList.add('active');
-                toggleUser.classList.remove('active');
-                title.textContent = '🛡️ Admin Login';
-                subtitle.textContent = 'Administrator access only';
-            } else {
-                card.classList.remove('admin-mode');
-                toggleUser.classList.add('active');
-                toggleAdmin.classList.remove('active');
-                title.textContent = '🏥 Welcome Back';
-                subtitle.textContent = 'Sign in to your health dashboard';
-            }
-        }
-
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -132,7 +93,6 @@
                 const response = await window.healthAssistant.apiRequest('/auth/login', 'POST', { email, password });
 
                 if (!response || !response.token) {
-                    // If response is null, apiRequest already showed the error toast
                     if (response === null) {
                         // Auth error already handled by apiRequest (401/422)
                         submitBtn.disabled = false;
@@ -142,47 +102,27 @@
                     throw new Error('Invalid response from server');
                 }
 
-                if (currentMode === 'admin') {
-                    if (response.role !== 'admin') {
-                        errEl.textContent = 'Access denied. Admin credentials required.';
-                        errEl.style.display = 'block';
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Sign In';
-                        return;
-                    }
+                // Auto-detect role from backend response
+                const role = response.role || 'user';
 
-                    localStorage.setItem('userToken', response.token);
-                    localStorage.setItem('userName', response.name);
-                    localStorage.setItem('userRole', 'admin');
-                    localStorage.setItem('userData', JSON.stringify({
-                        user_id: response.user_id,
-                        name: response.name,
-                        email: response.email,
-                        role: 'admin'
-                    }));
+                localStorage.setItem('userToken', response.token);
+                localStorage.setItem('userName', response.name);
+                localStorage.setItem('userRole', role);
+                localStorage.setItem('userData', JSON.stringify({
+                    user_id: response.user_id,
+                    name: response.name,
+                    email: response.email,
+                    role: role
+                }));
 
-                    window.healthAssistant.showToast('Admin login successful!', 'success');
-                    setTimeout(function () {
-                        window.location.href = 'admin-dashboard.html';
-                    }, 1000);
-                } else {
-                    localStorage.setItem('userToken', response.token);
-                    localStorage.setItem('userName', response.name);
-                    const role = response.role || 'user';
-                    localStorage.setItem('userRole', role);
-                    localStorage.setItem('userData', JSON.stringify({
-                        user_id: response.user_id,
-                        name: response.name,
-                        email: response.email,
-                        role: role
-                    }));
-
-                    window.healthAssistant.showToast('Login successful!', 'success');
-                    const redirect = role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
-                    setTimeout(function () {
-                        window.location.href = redirect;
-                    }, 1000);
-                }
+                const isAdmin = role === 'admin';
+                window.healthAssistant.showToast(
+                    isAdmin ? 'Admin login successful!' : 'Login successful!',
+                    'success'
+                );
+                setTimeout(function () {
+                    window.location.href = isAdmin ? 'admin-dashboard.html' : 'dashboard.html';
+                }, 1000);
             } catch (err) {
                 errEl.textContent = err.message || 'Login failed. Please try again.';
                 errEl.style.display = 'block';
@@ -190,12 +130,6 @@
                 submitBtn.textContent = 'Sign In';
             }
         });
-
-        // Check URL params for pre-selecting admin mode
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('mode') === 'admin') {
-            switchMode('admin');
-        }
 
         // ─── FORGOT PASSWORD MODAL ──────────────────────────────────────
         function openForgotModal() {

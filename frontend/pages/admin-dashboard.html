@@ -295,11 +295,11 @@
             localStorage.removeItem('userData');
             localStorage.removeItem('userName');
             localStorage.removeItem('userRole');
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
         }
 
         if (!localStorage.getItem('userToken') || localStorage.getItem('userRole') !== 'admin') {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
         }
 
         document.querySelectorAll('.admin-tabs button').forEach(btn => {
