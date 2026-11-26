@@ -336,7 +336,6 @@ function clearChatHistory() {
 // Export to global
 window.sendChat = sendChat;
 window.clearChatHistory = clearChatHistory;
-window.toggleChatbot = toggleChatbot;
 window.handleFileSelect = handleFileSelect;
 window.removeFilePreview = removeFilePreview;
 window.useSuggestion = useSuggestion;

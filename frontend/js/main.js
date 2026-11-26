@@ -259,6 +259,11 @@ async function getHealthSummary() {
 // APPOINTMENTS
 // ========================
 
+// Show exactly one "Dr." prefix, whether or not the user typed it
+function formatDoctorName(name) {
+    return 'Dr. ' + String(name || '').trim().replace(/^(dr(\.\s*|\s+))+/i, '');
+}
+
 async function bookAppointment(data) {
     try {
         await apiRequest('/appointments/book', 'POST', {
@@ -427,6 +432,7 @@ window.healthAssistant = {
     sendChatMessage,
     apiRequest,
     showToast,
+    formatDoctorName,
     isAuthenticated,
 };
 

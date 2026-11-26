@@ -46,7 +46,7 @@ async function loadAppointments() {
 
             return `
                 <tr>
-                    <td>🩺 Dr. ${apt.doctor_name}</td>
+                    <td>🩺 ${window.healthAssistant.formatDoctorName(apt.doctor_name)}</td>
                     <td>${apt.doctor_specialization || 'General'}</td>
                     <td>${aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${aptDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
                     <td><span class="health-item-status ${status.cls}">${status.label}</span></td>

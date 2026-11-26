@@ -299,8 +299,10 @@ a {
 /* ========================
    MAIN CONTENT AREA
    ======================== */
+/* Let wide content shrink instead of stretching the page on phones */
 .main-content {
     flex: 1;
+    min-width: 0;
     margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
@@ -698,6 +700,15 @@ a {
     animation: fadeInUp 0.5s ease-out backwards;
 }
 
+/* Wide tables scroll inside their own card */
+.card {
+    min-width: 0;
+}
+
+.card:has(table) {
+    overflow-x: auto;
+}
+
 .card:hover {
     box-shadow: var(--shadow-md);
 }
@@ -750,6 +761,9 @@ a {
 
 .chart-bar-group {
     flex: 1;
+    min-width: 0;
+    height: 100%;
+    justify-content: flex-end;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -757,7 +771,8 @@ a {
 }
 
 .chart-bar {
-    width: 36px;
+    width: 100%;
+    max-width: 36px;
     border-radius: 8px 8px 4px 4px;
     background: linear-gradient(180deg, var(--accent-green), var(--accent-green-light));
     transition: var(--transition-base);

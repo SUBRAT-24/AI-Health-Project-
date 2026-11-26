@@ -67,6 +67,22 @@ async function loadDashboardData() {
 }
 
 // ========================
+// USER HEIGHT (for BMI)
+// ========================
+
+let userHeightPromise = null;
+
+// Height saved in Settings, in metres. Resolves to null if not set or unavailable.
+function getUserHeight() {
+    if (!userHeightPromise) {
+        userHeightPromise = window.healthAssistant.apiRequest('/settings/profile')
+            .then(profile => (profile && profile.height > 0 ? profile.height / 100 : null))
+            .catch(() => null);
+    }
+    return userHeightPromise;
+}
+
+// ========================
 // STAT CARDS
 // ========================
 
@@ -75,7 +91,7 @@ async function loadHealthStats() {
         const healthData = await window.healthAssistant.getHealthData(30);
         if (healthData && healthData.length > 0) {
             const latest = healthData[0];
-            updateStatCards(latest);
+            updateStatCards(latest, await getUserHeight());
             updateRecentReadings(latest);
         } else {
             // No data yet — show placeholder
@@ -87,7 +103,7 @@ async function loadHealthStats() {
     }
 }
 
-function updateStatCards(data) {
+function updateStatCards(data, height) {
     if (!data) return;
 
     // Heart Rate
@@ -142,15 +158,15 @@ function updateStatCards(data) {
 
     // BMI
     if (data.weight) {
-        const height = 1.75; // Default — should come from user profile
-        const bmi = (data.weight / (height * height)).toFixed(1);
+        const bmi = height ? (data.weight / (height * height)).toFixed(1) : null;
         const bmiEl = document.getElementById('bmi');
-        if (bmiEl) bmiEl.textContent = bmi;
+        if (bmiEl) bmiEl.textContent = bmi || '--';
 
         const bmiStatus = document.getElementById('bmiStatus');
         if (bmiStatus) {
             const bmiVal = parseFloat(bmi);
-            if (bmiVal < 18.5) bmiStatus.textContent = 'Underweight';
+            if (!bmi) bmiStatus.textContent = 'Add height in Settings';
+            else if (bmiVal < 18.5) bmiStatus.textContent = 'Underweight';
             else if (bmiVal < 25) bmiStatus.textContent = 'Normal weight';
             else if (bmiVal < 30) bmiStatus.textContent = 'Overweight';
             else bmiStatus.textContent = 'Obese';
@@ -351,14 +367,14 @@ async function loadHealthInsights() {
         `).join('');
 
         // Update wellness progress circle
-        updateWellnessScore(latest);
+        updateWellnessScore(latest, await getUserHeight());
 
     } catch (error) {
         console.error('Error loading health insights:', error);
     }
 }
 
-function updateWellnessScore(latestData) {
+function updateWellnessScore(latestData, height) {
     let score = 50; // Base score
     let checks = 0;
     let goodChecks = 0;
@@ -375,9 +391,9 @@ function updateWellnessScore(latestData) {
         checks++;
         if (latestData.temperature <= 37.5 && latestData.temperature >= 36.0) goodChecks++;
     }
-    if (latestData.weight) {
+    if (latestData.weight && height) {
         checks++;
-        const bmi = latestData.weight / (1.75 * 1.75);
+        const bmi = latestData.weight / (height * height);
         if (bmi >= 18.5 && bmi <= 25) goodChecks++;
     }
 
@@ -435,7 +451,7 @@ async function loadRecentActivity() {
             html += `
                 <tr>
                     <td>${formatDate(apt.appointment_date)}</td>
-                    <td>🩺 Appointment with Dr. ${apt.doctor_name}</td>
+                    <td>🩺 Appointment with ${window.healthAssistant.formatDoctorName(apt.doctor_name)}</td>
                     <td>
                         <span class="health-item-status ${statusClass === 'completed' ? 'normal' : statusClass === 'pending' ? 'critical' : 'warning'}">
                             ${apt.status}
@@ -503,7 +519,7 @@ async function loadReminders() {
             html += `
                 <div class="reminder-item">
                     <div class="reminder-label">Upcoming</div>
-                    <div class="reminder-title">Dr. ${next.doctor_name} — ${next.doctor_specialization || 'General'}</div>
+                    <div class="reminder-title">${window.healthAssistant.formatDoctorName(next.doctor_name)} — ${next.doctor_specialization || 'General'}</div>
                     <div class="reminder-time">⏰ ${aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${aptDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
                     <button class="btn-reminder" onclick="window.location.href='appointments.html'">View Appointment</button>
                 </div>
