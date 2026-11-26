@@ -23,6 +23,11 @@ if (typeof API_BASE_URL === 'undefined') {
  * Show toast notification
  */
 function showToast(message, type = 'info', duration = 3000) {
+    // Animated toast from motion.js, with a plain fallback if it isn't loaded
+    if (window.healthMotion) {
+        window.healthMotion.toast(message, type, duration);
+        return;
+    }
     const toast = document.createElement('div');
     toast.className = `alert alert-${type}`;
     toast.textContent = message;

@@ -69,6 +69,10 @@ async function handleSignup(e) {
 }
 
 function showAlert(message, type = 'info') {
+    if (window.healthMotion) {
+        window.healthMotion.toast(message, type, 4000);
+        return;
+    }
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.textContent = message;

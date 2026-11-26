@@ -1,0 +1,261 @@
+/* ==========================================================
+   HealthAI design system: motion tokens, dark mode, effects.
+   Load this after every other stylesheet.
+   ========================================================== */
+
+:root {
+    color-scheme: light;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --fx-fast: 160ms;
+    --fx-base: 280ms;
+    --fx-slow: 600ms;
+    --fx-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --fx-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- Dark theme tokens ---------- */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --mint: #1D3B27;
+    --mint-light: #132219;
+    --bg-main: #0E1512;
+    --bg-sidebar: #141E19;
+    --bg-card: #18241E;
+    --text-primary: #ECF3EE;
+    --text-secondary: #B4C2B9;
+    --text-muted: #8A9B90;
+    --border-color: #2A3A31;
+    --border-light: #223029;
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 20px 55px rgba(0, 0, 0, 0.55);
+}
+
+/* Surfaces that were hard-coded white */
+[data-theme="dark"] :is(.topbar-search input:focus, .topbar-shortcut, .topbar-icon-btn, .btn-outline,
+    .card-action, .auth-card, .modal-card, .modal-close, .chatbot-container, .chatbot-suggestions,
+    .bot-message .message-content, .chatbot-input, .hamburger, .auth-toggle-btn.active,
+    .form-group input, .form-group select, .form-group textarea, .goal-card input, .faq-cat-btn,
+    .faq-question, .faq-answer, .edu-card, .code-input, .reset-card, .landing-hero-badge,
+    .hero-card-preview, .landing-feature-card) {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] :is(.topbar, .landing-nav) { background: var(--bg-sidebar); }
+[data-theme="dark"] .topbar-icon-btn .notification-dot { border-color: var(--bg-card); }
+[data-theme="dark"] :is(.auth-wrapper, .reset-page-wrapper, .landing-hero) {
+    background: radial-gradient(circle at 20% 15%, #1C3D28, #0E1512 65%);
+}
+[data-theme="dark"] .landing-about { background: var(--mint-light); }
+[data-theme="dark"] .landing-footer { background: #08170D; }
+[data-theme="dark"] .privacy-action-card.danger { background: #2B1A1A; border-color: #6B2F2F; }
+/* Doubled class names outrank the surface rule above */
+[data-theme="dark"] .faq-cat-btn.faq-cat-btn.active { background: var(--primary-green); color: #fff; }
+[data-theme="dark"] .landing-hero-content h1 span {
+    background: linear-gradient(135deg, #6FCF7A, #B5EBBB);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+[data-theme="dark"] .faq-question.faq-question:hover,
+[data-theme="dark"] .btn-outline.btn-outline:hover,
+[data-theme="dark"] .card-action.card-action:hover,
+[data-theme="dark"] .topbar-icon-btn.topbar-icon-btn:hover { background: var(--mint); }
+
+/* Dark green text needs to be lighter on dark surfaces */
+[data-theme="dark"] :is(.sidebar-link:hover, .auth-card h2, .auth-links a, .modal-card h2,
+    .suggestion-chip, .chart-bar-value, .hero-mini-stat-value, .landing-hero-badge, .guide-link,
+    .goal-card input, .code-input, .settings-tab:hover, .faq-cat-btn:hover, .btn-outline:hover,
+    .card-action:hover, .topbar-icon-btn:hover, .auth-toggle-btn.active,
+    .landing-nav-links a:hover, .landing-nav-links .nav-btn-login, .back-link a:hover) {
+    color: #8BD493;
+}
+[data-theme="dark"] .landing-nav-links .nav-btn-login:hover { color: #fff; }
+
+/* Links that set the dark green colour inline */
+[data-theme="dark"] a[style*="--primary-green"] {
+    color: #8BD493 !important;
+}
+
+/* Soft status badges */
+[data-theme="dark"] :is(.health-item-status.normal, .team-status.completed, .ticket-status.resolved,
+    .verification-badge.verified, .edu-card-badge.nutrition, .health-item-icon.steps, .toast.success) {
+    background: #17361F; color: #9BE3A6;
+}
+[data-theme="dark"] :is(.health-item-status.warning, .health-item-status.progress, .team-status.progress,
+    .ticket-status.in_progress, .verification-badge.unverified, .edu-card-badge.sleep, .health-item-icon.weight) {
+    background: #3B2A12; color: #FFC982;
+}
+[data-theme="dark"] :is(.health-item-status.critical, .team-status.pending, .auth-error,
+    .message.error .message-content, .edu-card-badge.vitals, .health-item-icon.heart,
+    .health-item-icon.temp, .toast.error) {
+    background: #3B1C1F; color: #FFADAD;
+}
+[data-theme="dark"] :is(.ticket-status.open, .edu-card-badge.fitness, .health-item-icon.bp, .toast.info) {
+    background: #15293D; color: #A5D0FF;
+}
+
+/* Inline light borders and code blocks created by scripts */
+[data-theme="dark"] [style*="#f0f0f0"] {
+    border-color: var(--border-color) !important;
+    background-color: transparent;
+}
+
+/* ---------- Theme switch ---------- */
+.fx-theme-btn {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: transform var(--fx-base) var(--fx-spring), border-color var(--fx-fast);
+}
+.fx-theme-btn:hover { border-color: var(--accent-green); transform: rotate(-12deg) scale(1.08); }
+.fx-theme-btn svg { width: 20px; height: 20px; }
+.fx-theme-btn--floating { position: fixed; right: 16px; bottom: 16px; z-index: 900; box-shadow: var(--shadow-md); }
+.fx-theme-btn--nav { margin-left: var(--space-3); }
+
+/* Circular reveal when the theme changes */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: fx-reveal 650ms var(--fx-ease); }
+@keyframes fx-reveal {
+    from { clip-path: circle(0 at var(--fx-x, 100%) var(--fx-y, 0)); }
+    to   { clip-path: circle(150vmax at var(--fx-x, 100%) var(--fx-y, 0)); }
+}
+
+/* ---------- Card tilt and glare ---------- */
+.fx-tilt {
+    transition: transform var(--fx-base) var(--fx-ease), box-shadow var(--fx-base);
+}
+.fx-tilt.fx-tilting {
+    transform: perspective(700px) rotateX(var(--fx-rx, 0deg)) rotateY(var(--fx-ry, 0deg)) translateY(-4px) !important;
+    transition-duration: 80ms;
+    box-shadow: var(--shadow-lg),
+        inset 0 0 0 1px rgba(76, 175, 80, 0.35);
+}
+
+/* ---------- Magnetic buttons ---------- */
+.fx-magnetic {
+    translate: var(--fx-mx, 0px) var(--fx-my, 0px);
+    transition: translate var(--fx-base) var(--fx-spring), background var(--fx-fast), box-shadow var(--fx-fast), transform var(--fx-fast);
+}
+
+/* ---------- Click ripple ---------- */
+.fx-ripple {
+    position: fixed;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 10001;
+}
+.fx-ripple span {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(129, 199, 132, 0.45);
+    transform: scale(0);
+    animation: fx-ripple 600ms ease-out forwards;
+}
+@keyframes fx-ripple { to { transform: scale(1); opacity: 0; } }
+
+/* ---------- Loading skeletons ---------- */
+.fx-skeleton { position: relative; }
+.stat-value.fx-skeleton { display: inline-block; min-width: 4.5rem; }
+.fx-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-sm);
+    background-color: var(--mint);
+    background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: fx-shimmer 1.2s linear infinite;
+    z-index: 2;
+}
+[data-theme="dark"] .fx-skeleton::after {
+    background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+}
+@keyframes fx-shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+
+/* ---------- Toast notifications ---------- */
+.fx-toasts {
+    position: fixed;
+    top: 20px;
+    right: 16px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: min(340px, calc(100vw - 32px));
+    pointer-events: none;
+}
+.fx-toast {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    font-size: 0.9rem;
+    font-weight: 600;
+    animation: fx-toast-in 500ms var(--fx-spring) both;
+    --fx-tone: #2196F3;
+}
+.fx-toast--success { --fx-tone: #4CAF50; }
+.fx-toast--error { --fx-tone: #F44336; }
+.fx-toast--warning { --fx-tone: #FF9800; }
+.fx-toast-icon {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--fx-tone);
+    color: #fff;
+    font-size: 0.8rem;
+}
+.fx-toast::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--fx-tone);
+    transform-origin: left;
+    animation: fx-toast-timer var(--fx-life, 3s) linear forwards;
+}
+.fx-toast.fx-leaving { animation: fx-toast-out 280ms ease-in forwards; }
+@keyframes fx-toast-in { from { opacity: 0; transform: translateX(110%) scale(0.9); } }
+@keyframes fx-toast-out { to { opacity: 0; transform: translateX(110%); } }
+@keyframes fx-toast-timer { to { transform: scaleX(0); } }
+
+/* ---------- Accessibility and performance ---------- */
+:focus-visible { outline: 3px solid var(--accent-green); outline-offset: 2px; }
+
+.fx-paused *, .fx-paused *::before, .fx-paused *::after { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after,
+    ::view-transition-new(root) {
+        animation-duration: 1ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+    }
+    .fx-toast::after { display: none; }
+}
