@@ -7,7 +7,7 @@
         content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Health Assistant - Your Personal AI-Powered Health Platform</title>
-    <meta name="description" content="Monitor your health, get personalized diet and exercise recommendations, and consult with AI — all in one beautiful platform.">
+    <meta name="description" content="Log your vitals, get diet and exercise suggestions, manage appointments and chat with a health assistant.">
     <link rel="stylesheet" href="css/dashboard-new.css">
     <style>
         /* ===== LANDING PAGE SPECIFIC ===== */
@@ -427,6 +427,8 @@
     </style>
     <link rel="stylesheet" href="css/motion.css">
     <script src="js/motion.js"></script>
+    <link rel="stylesheet" href="css/landing.css">
+    <script src="js/landing.js" defer></script>
 </head>
 
 <body class="landing-body">
@@ -442,108 +444,184 @@
             <li><a href="#features">Features</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="pages/login.html" class="nav-btn-login">Login</a></li>
-            <li><a href="pages/signup.html" class="nav-btn-signup">Sign Up</a></li>
+            <li class="lp-auth"><a href="pages/login.html" class="nav-btn-login">Login</a></li>
+            <li class="lp-auth"><a href="pages/signup.html" class="nav-btn-signup">Sign Up</a></li>
         </ul>
     </nav>
+
+    <div class="lp-progress" aria-hidden="true"></div>
 
     <!-- Hero Section -->
     <section id="home" class="landing-hero">
         <div class="landing-hero-content">
-            <div class="landing-hero-badge">✨ AI-Powered Platform</div>
-            <h1>Your Personal <span>Health Companion</span></h1>
-            <p>Monitor your health, get personalized recommendations, and consult with AI — all in one beautiful, intelligent platform.</p>
-            <div class="landing-hero-buttons">
+            <div class="landing-hero-badge lp-rise">✨ AI-Assisted Health Platform</div>
+            <h1><i class="w" style="--i:0">Your</i> <i class="w" style="--i:1">Personal</i> <i class="w hl" style="--i:2">Health</i> <i class="w hl" style="--i:3">Companion</i></h1>
+            <p class="lp-rise" style="--d:650ms">Log your vitals, get diet and exercise suggestions, and chat with a health assistant — all in one place.</p>
+            <div class="landing-hero-buttons lp-rise" style="--d:800ms">
                 <a href="pages/signup.html" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem;">
                     Get Started →
                 </a>
-                <a href="#features" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 1rem;">
-                    Learn More
+                <a href="#story" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                    See How It Works
                 </a>
             </div>
         </div>
-        <div class="landing-hero-visual">
-            <div class="hero-card-preview">
-                <div class="hero-card-preview-header">
-                    <div class="hero-preview-dot r"></div>
-                    <div class="hero-preview-dot y"></div>
-                    <div class="hero-preview-dot g"></div>
-                </div>
-                <div class="hero-mini-stats">
-                    <div class="hero-mini-stat">
-                        <div class="hero-mini-stat-value">72</div>
-                        <div class="hero-mini-stat-label">Heart Rate</div>
-                    </div>
-                    <div class="hero-mini-stat">
-                        <div class="hero-mini-stat-value">120/80</div>
-                        <div class="hero-mini-stat-label">Blood Pressure</div>
-                    </div>
-                    <div class="hero-mini-stat">
-                        <div class="hero-mini-stat-value">36.6°</div>
-                        <div class="hero-mini-stat-label">Temperature</div>
-                    </div>
-                    <div class="hero-mini-stat">
-                        <div class="hero-mini-stat-value">98%</div>
-                        <div class="hero-mini-stat-label">O₂ Saturation</div>
-                    </div>
-                </div>
-                <div class="hero-mini-chart">
-                    <div class="hero-mini-chart-bar"></div>
-                    <div class="hero-mini-chart-bar"></div>
-                    <div class="hero-mini-chart-bar"></div>
-                    <div class="hero-mini-chart-bar"></div>
-                    <div class="hero-mini-chart-bar"></div>
-                    <div class="hero-mini-chart-bar"></div>
-                </div>
-            </div>
+        <div class="lp-heart">
+            <canvas id="heartCanvas" role="img" aria-label="A beating heart made of particles"></canvas>
+            <div class="lp-chip lp-chip--hr"><strong>72 bpm</strong>Heart rate</div>
+            <div class="lp-chip lp-chip--bp"><strong>118/78</strong>Blood pressure</div>
+            <span class="lp-demo">Demo data · move over or tap the heart</span>
+        </div>
+    </section>
+
+    <!-- Scroll Story -->
+    <section id="story" class="lp-story">
+        <div class="lp-story-stage">
+            <h2>One reading, three steps</h2>
+            <p class="lp-story-note">An example with demo data</p>
+            <ol class="lp-steps">
+                <li class="lp-step is-active">
+                    <h3><b>1</b>Log your vitals</h3>
+                    <div class="lp-field">Heart rate <strong>72 bpm</strong></div>
+                    <div class="lp-field">Blood pressure <strong>118/78</strong></div>
+                    <div class="lp-field">Weight <strong>68 kg</strong></div>
+                    <p>Enter a reading from your dashboard.</p>
+                </li>
+                <li class="lp-step">
+                    <h3><b>2</b>See the trend</h3>
+                    <svg class="lp-chart" viewBox="0 0 320 140" role="img" aria-label="Demo heart rate trend ending at 72 beats per minute">
+                        <path pathLength="1" d="M8 104 L69 70 L130 86 L191 34 L252 62 L312 86"/>
+                        <circle cx="312" cy="86" r="7"/>
+                    </svg>
+                    <p>Your readings are plotted over time.</p>
+                </li>
+                <li class="lp-step">
+                    <h3><b>3</b>Understand it</h3>
+                    <div class="lp-insight">💓 72 bpm is within the typical resting range of 60–100 bpm.</div>
+                    <p>Simple notes show which readings are in range. They are not a diagnosis.</p>
+                </li>
+            </ol>
+            <div class="lp-track" aria-hidden="true"><span></span></div>
         </div>
     </section>
 
     <!-- Features Section -->
     <section id="features" class="landing-features">
-        <h2>Powerful Features</h2>
-        <p class="landing-features-subtitle">Everything you need to take control of your health journey</p>
+        <h2 class="lp-reveal">Features</h2>
+        <p class="landing-features-subtitle lp-reveal">Select a card to see what it does</p>
         <div class="landing-features-grid">
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">📈</div>
-                <h3>Health Monitoring</h3>
-                <p>Real-time health tracking and monitoring with AI-powered insights and alerts</p>
+            <div class="lp-reveal" style="--d:0ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">📈</span>
+                            <span class="title">Health Tracking</span>
+                            <span class="text">Keep your vitals in one place</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Health Tracking</span>
+                            <span class="text">Log heart rate, blood pressure, weight and temperature, then view charts and export your records.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">🩺</div>
-                <h3>Doctor Consultation</h3>
-                <p>Book appointments and consult with qualified medical professionals</p>
+            <div class="lp-reveal" style="--d:120ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">🩺</span>
+                            <span class="title">Appointments</span>
+                            <span class="text">Stay on top of doctor visits</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Appointments</span>
+                            <span class="text">Save the doctor, specialization, date and time, and cancel when plans change.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">🥗</div>
-                <h3>Diet Suggestions</h3>
-                <p>Personalized nutrition recommendations based on your unique health profile</p>
+            <div class="lp-reveal" style="--d:240ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">🥗</span>
+                            <span class="title">Diet Suggestions</span>
+                            <span class="text">Food ideas that fit you</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Diet Suggestions</span>
+                            <span class="text">Enter your age, gender and health condition to get nutrition suggestions.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">🏃</div>
-                <h3>Exercise Plans</h3>
-                <p>Customized exercise routines tailored to your fitness level and health goals</p>
+            <div class="lp-reveal" style="--d:0ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">🏃</span>
+                            <span class="title">Exercise Plans</span>
+                            <span class="text">Workouts for your level</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Exercise Plans</span>
+                            <span class="text">Choose your fitness level and get exercise recommendations.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">💊</div>
-                <h3>Medicine Tracking</h3>
-                <p>Track prescribed medications with smart reminders so you never miss a dose</p>
+            <div class="lp-reveal" style="--d:120ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">📋</span>
+                            <span class="title">Medical Reports</span>
+                            <span class="text">Your documents together</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Medical Reports</span>
+                            <span class="text">Upload medical reports and find them again in your account.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
-            <div class="landing-feature-card">
-                <div class="landing-feature-icon">🤖</div>
-                <h3>AI Chatbot</h3>
-                <p>24/7 health advice and instant support from our intelligent AI assistant</p>
+            <div class="lp-reveal" style="--d:240ms">
+                <button type="button" class="flip-card" aria-pressed="false" style="height:100%">
+                    <span class="flip-inner">
+                        <span class="flip-face flip-face--front" aria-hidden="false">
+                            <span class="landing-feature-icon" aria-hidden="true">🤖</span>
+                            <span class="title">Health Chatbot</span>
+                            <span class="text">Ask health questions</span>
+                            <span class="hint">Details ↻</span>
+                        </span>
+                        <span class="flip-face flip-face--back" aria-hidden="true">
+                            <span class="title">Health Chatbot</span>
+                            <span class="text">Get general health information in a chat window. It does not replace a doctor.</span>
+                            <span class="hint">Back ↻</span>
+                        </span>
+                    </span>
+                </button>
             </div>
         </div>
     </section>
 
     <!-- About Section -->
     <section id="about" class="landing-about">
-        <div class="landing-about-inner">
+        <div class="landing-about-inner lp-reveal">
             <h2>About AI Health Assistant</h2>
-            <p>Our platform combines cutting-edge AI technology with healthcare expertise to provide comprehensive health
-                management solutions. We use advanced machine learning models including CNN for disease detection, NLP for
-                health analysis, and LLMs for personalized recommendations.</p>
+            <p>A web application built with Flask, using secure token-based sign-in. It brings health tracking,
+                appointments, reports and suggestions together, with a chatbot that can use Google Gemini when it is
+                configured and built-in answers otherwise.</p>
         </div>
     </section>
 
@@ -552,7 +630,7 @@
         <div class="landing-footer-content">
             <div>
                 <h4>🏥 HealthAI</h4>
-                <p>Your personal health companion powered by advanced artificial intelligence.</p>
+                <p>General health information only. Always ask a doctor for medical advice.</p>
             </div>
             <div>
                 <h4>Quick Links</h4>
@@ -563,9 +641,8 @@
                 </ul>
             </div>
             <div>
-                <h4>Contact Us</h4>
-                <p>Email: support@aihealthassistant.com</p>
-                <p>Phone: +1-800-HEALTH</p>
+                <h4>Contact</h4>
+                <p><a class="lp-link" href="https://github.com/SUBRAT-24/AI-Health-Project-" target="_blank" rel="noopener noreferrer">View the project on GitHub</a></p>
             </div>
         </div>
         <div class="landing-footer-bottom">
