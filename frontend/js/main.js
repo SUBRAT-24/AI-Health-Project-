@@ -237,9 +237,11 @@ async function updateHealthMetrics(metrics) {
             notes: metrics.notes || ''
         });
 
-        showToast('Health data updated successfully!', 'success');
+        showToast('Health data saved successfully!', 'success');
+        return true;
     } catch (error) {
-        showToast('Failed to update health data', 'error');
+        showToast('Failed to save health data', 'error');
+        return false;
     }
 }
 

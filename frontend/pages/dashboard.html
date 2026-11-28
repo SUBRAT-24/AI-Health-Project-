@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../css/dashboard-new.css">
     <link rel="stylesheet" href="../css/motion.css">
     <script src="../js/motion.js"></script>
+    <link rel="stylesheet" href="../css/dashboard-motion.css">
 </head>
 
 <body>
@@ -117,6 +118,20 @@
                     </div>
                 </div>
 
+                <!-- Living Pulse -->
+                <section class="pulse-banner" id="livingPulse" data-state="idle" aria-label="Living Pulse">
+                    <div class="pulse-glow" aria-hidden="true"></div>
+                    <div class="pulse-info">
+                        <svg class="pulse-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.3-9.6-10.4C1.3 7 3.6 3.8 7 3.8c2.1 0 3.9 1.2 5 3 1.1-1.8 2.9-3 5-3 3.4 0 5.7 3.2 4.6 6.8C20 15.7 12 21 12 21z"/></svg>
+                        <div>
+                            <div class="pulse-bpm"><span id="pulseBpm">--</span><small>bpm</small></div>
+                            <span class="pulse-label" id="pulseLabel" role="status">Loading your latest reading…</span>
+                        </div>
+                    </div>
+                    <canvas class="pulse-trace" id="pulseTrace" role="img" aria-label="Pulse trace"></canvas>
+                    <button type="button" class="btn btn-primary pulse-action" id="pulseAction" onclick="openHealthModal()" hidden>+ Add your first reading</button>
+                </section>
+
                 <!-- Stat Cards -->
                 <div class="stats-row">
                     <div class="stat-card highlight" id="statHeartRate">
@@ -124,7 +139,7 @@
                             <span class="stat-label">Heart Rate</span>
                             <span class="stat-value" id="heartRate">--</span>
                             <span class="stat-change" id="heartRateChange">
-                                📈 Updated recently
+                                No reading yet
                             </span>
                         </div>
                         <div class="stat-icon">💓</div>
@@ -135,7 +150,7 @@
                             <span class="stat-label">Blood Pressure</span>
                             <span class="stat-value" id="bloodPressure">--/--</span>
                             <span class="stat-change" id="bpChange">
-                                📈 Updated recently
+                                No reading yet
                             </span>
                         </div>
                         <div class="stat-icon">🩺</div>
@@ -146,7 +161,7 @@
                             <span class="stat-label">Weight</span>
                             <span class="stat-value" id="weight">-- kg</span>
                             <span class="stat-change" id="weightChange">
-                                📈 Updated recently
+                                No reading yet
                             </span>
                         </div>
                         <div class="stat-icon">⚖️</div>
@@ -174,48 +189,7 @@
                             <button class="card-action" id="analyticsFilter">This Week</button>
                         </div>
                         <div class="chart-container" id="healthChart">
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 50%;" data-value="65">
-                                    <span class="chart-bar-value">65</span>
-                                </div>
-                                <span class="chart-bar-label">M</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 65%;" data-value="72">
-                                    <span class="chart-bar-value">72</span>
-                                </div>
-                                <span class="chart-bar-label">T</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 80%;" data-value="78">
-                                    <span class="chart-bar-value">78%</span>
-                                </div>
-                                <span class="chart-bar-label">W</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 55%;" data-value="68">
-                                    <span class="chart-bar-value">68</span>
-                                </div>
-                                <span class="chart-bar-label">T</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 90%;" data-value="85">
-                                    <span class="chart-bar-value">85</span>
-                                </div>
-                                <span class="chart-bar-label">F</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 45%;" data-value="60">
-                                    <span class="chart-bar-value">60</span>
-                                </div>
-                                <span class="chart-bar-label">S</span>
-                            </div>
-                            <div class="chart-bar-group">
-                                <div class="chart-bar" style="height: 70%;" data-value="74">
-                                    <span class="chart-bar-value">74</span>
-                                </div>
-                                <span class="chart-bar-label">S</span>
-                            </div>
+                            <p class="empty-note">Loading your week…</p>
                         </div>
                     </div>
 
@@ -225,19 +199,7 @@
                             <span class="card-title">Reminders</span>
                         </div>
                         <div id="remindersContainer">
-                            <div class="reminder-item">
-                                <div class="reminder-label">Upcoming</div>
-                                <div class="reminder-title">Doctor's Appointment</div>
-                                <div class="reminder-time">⏰ Time: 02:00 pm - 04:00 pm</div>
-                                <button class="btn-reminder" onclick="window.location.href='appointments.html'">
-                                    View Appointment
-                                </button>
-                            </div>
-                            <div class="reminder-item">
-                                <div class="reminder-label">Daily</div>
-                                <div class="reminder-title">Take Medication</div>
-                                <div class="reminder-time">💊 After breakfast, lunch & dinner</div>
-                            </div>
+                            <p class="empty-note">Loading reminders…</p>
                         </div>
                     </div>
 
@@ -254,7 +216,7 @@
                                     <div class="health-item-name">Heart Rate Check</div>
                                     <div class="health-item-date" id="hrDate">--</div>
                                 </div>
-                                <span class="health-item-status normal" id="hrStatus">Normal</span>
+                                <span class="health-item-status" id="hrStatus">No data</span>
                             </div>
                             <div class="health-item">
                                 <div class="health-item-icon bp">🩺</div>
@@ -262,7 +224,7 @@
                                     <div class="health-item-name">Blood Pressure</div>
                                     <div class="health-item-date" id="bpDate">--</div>
                                 </div>
-                                <span class="health-item-status normal" id="bpStatus">Normal</span>
+                                <span class="health-item-status" id="bpStatus">No data</span>
                             </div>
                             <div class="health-item">
                                 <div class="health-item-icon weight">⚖️</div>
@@ -270,7 +232,7 @@
                                     <div class="health-item-name">Weight Tracking</div>
                                     <div class="health-item-date" id="weightDate">--</div>
                                 </div>
-                                <span class="health-item-status normal" id="weightStatus">Stable</span>
+                                <span class="health-item-status" id="weightStatus">No data</span>
                             </div>
                             <div class="health-item">
                                 <div class="health-item-icon temp">🌡️</div>
@@ -278,15 +240,7 @@
                                     <div class="health-item-name">Temperature</div>
                                     <div class="health-item-date" id="tempDate">--</div>
                                 </div>
-                                <span class="health-item-status normal" id="tempStatus">Normal</span>
-                            </div>
-                            <div class="health-item">
-                                <div class="health-item-icon steps">🏃</div>
-                                <div class="health-item-info">
-                                    <div class="health-item-name">Exercise Logged</div>
-                                    <div class="health-item-date" id="exerciseDate">--</div>
-                                </div>
-                                <span class="health-item-status progress" id="exerciseStatus">Active</span>
+                                <span class="health-item-status" id="tempStatus">No data</span>
                             </div>
                         </div>
                     </div>
@@ -302,38 +256,7 @@
                             <button class="card-action" id="refreshInsights">🔄 Refresh</button>
                         </div>
                         <div id="healthInsights">
-                            <div class="team-member">
-                                <div class="team-avatar a">🧠</div>
-                                <div class="team-info">
-                                    <div class="team-name">Stay Hydrated</div>
-                                    <div class="team-task">Drink at least <strong>8 glasses</strong> of water</div>
-                                </div>
-                                <span class="team-status completed">✓</span>
-                            </div>
-                            <div class="team-member">
-                                <div class="team-avatar b">🏃</div>
-                                <div class="team-info">
-                                    <div class="team-name">Daily Exercise</div>
-                                    <div class="team-task">Exercise <strong>30 min</strong> for optimal health</div>
-                                </div>
-                                <span class="team-status progress">In Progress</span>
-                            </div>
-                            <div class="team-member">
-                                <div class="team-avatar c">🥗</div>
-                                <div class="team-info">
-                                    <div class="team-name">Balanced Diet</div>
-                                    <div class="team-task">Vegetables and <strong>proteins</strong> daily</div>
-                                </div>
-                                <span class="team-status pending">Pending</span>
-                            </div>
-                            <div class="team-member">
-                                <div class="team-avatar d">😴</div>
-                                <div class="team-info">
-                                    <div class="team-name">Quality Sleep</div>
-                                    <div class="team-task">Get <strong>7-9 hours</strong> every night</div>
-                                </div>
-                                <span class="team-status completed">✓</span>
-                            </div>
+                            <p class="empty-note">Loading insights…</p>
                         </div>
                     </div>
 
@@ -349,7 +272,7 @@
                                     <circle class="fill" cx="80" cy="80" r="70" id="progressFill"></circle>
                                 </svg>
                                 <div class="progress-label">
-                                    <div class="progress-value" id="progressValue">72%</div>
+                                    <div class="progress-value" id="progressValue">--</div>
                                     <div class="progress-text">Wellness Score</div>
                                 </div>
                             </div>
@@ -373,6 +296,10 @@
                     <!-- Wellness Timer -->
                     <div class="card time-tracker-card" style="animation-delay: 0.5s;">
                         <div class="time-tracker-title">🧘 Wellness Timer</div>
+                        <div class="breath">
+                            <div class="breath-circle" aria-hidden="true"></div>
+                            <span class="breath-text" aria-live="polite">Press play</span>
+                        </div>
                         <div class="time-tracker-display" id="wellnessTimer">00:00:00</div>
                         <div class="time-tracker-controls">
                             <button class="time-tracker-btn pause" id="timerToggle" onclick="toggleTimer()" title="Start/Pause">
@@ -490,6 +417,7 @@
 
     <script src="../js/api-config.js"></script>
     <script src="../js/main.js"></script>
+    <script src="../js/dashboard-motion.js"></script>
     <script src="../js/dashboard.js"></script>
     <script src="../js/chatbot.js"></script>
 
@@ -510,13 +438,16 @@
                 clearInterval(timerInterval);
                 timerRunning = false;
                 btn.textContent = '▶';
+                window.dashboardMotion.breathe(false, timerSeconds);
             } else {
                 timerInterval = setInterval(() => {
                     timerSeconds++;
                     updateTimerDisplay();
+                    window.dashboardMotion.breathe(true, timerSeconds);
                 }, 1000);
                 timerRunning = true;
                 btn.textContent = '⏸';
+                window.dashboardMotion.breathe(true, timerSeconds);
             }
         }
 
@@ -526,6 +457,7 @@
             timerSeconds = 0;
             updateTimerDisplay();
             document.getElementById('timerToggle').textContent = '▶';
+            window.dashboardMotion.breathe(false, 0);
         }
 
         function updateTimerDisplay() {
@@ -537,15 +469,7 @@
 
         // ===== Chatbot toggle =====
         function toggleChatbot() {
-            const chatbot = document.getElementById('chatbot-container');
-            const toggle = document.getElementById('chatbot-toggle');
-            if (chatbot.style.display === 'none' || !chatbot.style.display) {
-                chatbot.style.display = 'flex';
-                toggle.style.display = 'none';
-            } else {
-                chatbot.style.display = 'none';
-                toggle.style.display = 'flex';
-            }
+            window.dashboardMotion.toggleChat();
         }
 
         // ===== User info in topbar =====

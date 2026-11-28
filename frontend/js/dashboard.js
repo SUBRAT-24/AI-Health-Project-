@@ -88,30 +88,35 @@ function getUserHeight() {
 
 async function loadHealthStats() {
     try {
-        const healthData = await window.healthAssistant.getHealthData(30);
-        if (healthData && healthData.length > 0) {
+        // Ask for the newest reading of any age. Called directly so that a failed
+        // request is reported as an error, not shown as "no readings yet".
+        const response = await window.healthAssistant.apiRequest('/health/data?days=3650');
+        const healthData = response.records || [];
+        if (healthData.length > 0) {
             const latest = healthData[0];
             updateStatCards(latest, await getUserHeight());
-            updateRecentReadings(latest);
+            window.dashboardMotion.updatePulse(latest);
         } else {
             // No data yet — show placeholder
             setStatCardEmpty();
+            window.dashboardMotion.updatePulse(null);
         }
     } catch (error) {
         console.error('Error loading health stats:', error);
         setStatCardEmpty();
+        window.dashboardMotion.updatePulse('error');
     }
 }
 
 function updateStatCards(data, height) {
     if (!data) return;
+    ['heartRateChange', 'bpChange'].forEach(id => document.getElementById(id)?.classList.remove('negative'));
 
     // Heart Rate
     if (data.heart_rate) {
         const hrEl = document.getElementById('heartRate');
         if (hrEl) {
-            hrEl.textContent = data.heart_rate;
-            animateValue(hrEl, 0, data.heart_rate, 800);
+            window.dashboardMotion.countTo(hrEl, data.heart_rate, v => Math.round(v));
         }
 
         const hrChange = document.getElementById('heartRateChange');
@@ -131,7 +136,8 @@ function updateStatCards(data, height) {
     // Blood Pressure
     if (data.systolic && data.diastolic) {
         const bpEl = document.getElementById('bloodPressure');
-        if (bpEl) bpEl.textContent = `${data.systolic}/${data.diastolic}`;
+        window.dashboardMotion.countTo(bpEl, 1, p =>
+            `${Math.round(data.systolic * p)}/${Math.round(data.diastolic * p)}`);
 
         const bpChange = document.getElementById('bpChange');
         if (bpChange) {
@@ -150,7 +156,8 @@ function updateStatCards(data, height) {
     // Weight
     if (data.weight) {
         const wEl = document.getElementById('weight');
-        if (wEl) wEl.textContent = `${data.weight} kg`;
+        window.dashboardMotion.countTo(wEl, data.weight, v =>
+            `${v === data.weight ? data.weight : v.toFixed(1)} kg`);
 
         const wChange = document.getElementById('weightChange');
         if (wChange) wChange.innerHTML = `📊 Last recorded`;
@@ -160,7 +167,8 @@ function updateStatCards(data, height) {
     if (data.weight) {
         const bmi = height ? (data.weight / (height * height)).toFixed(1) : null;
         const bmiEl = document.getElementById('bmi');
-        if (bmiEl) bmiEl.textContent = bmi || '--';
+        if (bmi) window.dashboardMotion.countTo(bmiEl, Number(bmi), v => v.toFixed(1));
+        else if (bmiEl) bmiEl.textContent = '--';
 
         const bmiStatus = document.getElementById('bmiStatus');
         if (bmiStatus) {
@@ -181,6 +189,11 @@ function updateStatCards(data, height) {
     });
 
     // Update status badges in recent readings
+    const weightStatus = document.getElementById('weightStatus');
+    if (weightStatus && data.weight) {
+        weightStatus.textContent = 'Logged';
+        weightStatus.classList.add('normal');
+    }
     updateReadingStatus('hrStatus', data.heart_rate, 60, 100, 'Normal', 'Low', 'High');
     updateBPStatus(data.systolic, data.diastolic);
     updateReadingStatus('tempStatus', data.temperature, 36.0, 37.5, 'Normal', 'Low', 'Fever');
@@ -222,13 +235,6 @@ function updateBPStatus(systolic, diastolic) {
     }
 }
 
-function updateRecentReadings(data) {
-    const exerciseDateEl = document.getElementById('exerciseDate');
-    if (exerciseDateEl) {
-        exerciseDateEl.textContent = data.timestamp ? formatTime(data.timestamp) : '--';
-    }
-}
-
 function setStatCardEmpty() {
     const ids = ['heartRate', 'bloodPressure', 'weight', 'bmi'];
     const defaults = ['--', '--/--', '-- kg', '--'];
@@ -246,10 +252,14 @@ function setStatCardEmpty() {
 async function loadHealthChart() {
     try {
         const healthData = await window.healthAssistant.getHealthData(7);
-        if (!healthData || healthData.length === 0) return;
-
         const chartContainer = document.getElementById('healthChart');
         if (!chartContainer) return;
+
+        if (!healthData || !healthData.some(record => record.heart_rate)) {
+            chartContainer.innerHTML = `<div class="empty-note">No heart rate readings this week.<br>
+                <button type="button" onclick="openHealthModal()">Add a reading →</button></div>`;
+            return;
+        }
 
         // Group data by day of week
         const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -271,11 +281,11 @@ async function loadHealthChart() {
         let chartHTML = '';
         dayLabels.forEach((label, i) => {
             const avg = dayCounts[i] > 0 ? Math.round(dayData[i] / dayCounts[i]) : 0;
-            const heightPercent = maxVal > 0 && avg > 0 ? Math.max((avg / (maxVal * 1.2)) * 100, 10) : 15;
+            const heightPercent = avg > 0 ? Math.max((avg / (maxVal * 1.2)) * 100, 10) : 3;
 
             chartHTML += `
                 <div class="chart-bar-group">
-                    <div class="chart-bar" style="height: ${heightPercent}%;" data-value="${avg}">
+                    <div class="chart-bar${avg ? '' : ' is-empty'}" style="height: ${heightPercent}%; animation-delay: ${i * 80}ms;" data-value="${avg}">
                         <span class="chart-bar-value">${avg || '--'}</span>
                     </div>
                     <span class="chart-bar-label">${label}</span>
@@ -311,6 +321,7 @@ async function loadHealthInsights() {
                     </div>
                 </div>
             `;
+            resetWellnessScore();
             return;
         }
 
@@ -374,6 +385,11 @@ async function loadHealthInsights() {
     }
 }
 
+function resetWellnessScore() {
+    document.getElementById('progressValue').textContent = '--';
+    document.getElementById('progressFill').style.strokeDashoffset = 2 * Math.PI * 70;
+}
+
 function updateWellnessScore(latestData, height) {
     let score = 50; // Base score
     let checks = 0;
@@ -403,7 +419,7 @@ function updateWellnessScore(latestData, height) {
 
     const progressValueEl = document.getElementById('progressValue');
     if (progressValueEl) {
-        progressValueEl.textContent = score + '%';
+        window.dashboardMotion.countTo(progressValueEl, score, v => Math.round(v) + '%');
     }
 
     // Update SVG circle
@@ -567,18 +583,17 @@ async function handleHealthFormSubmit(e) {
         notes: document.getElementById('notes').value
     };
 
-    try {
-        await window.healthAssistant.updateHealthMetrics(healthData);
-        closeHealthModal();
-        document.getElementById('healthForm').reset();
+    // Remember where the form was, so the saved reading can fly from there
+    const formBox = document.querySelector('#healthModal .modal-card').getBoundingClientRect();
 
-        // Reload all dashboard data
-        await loadDashboardData();
+    // Keep the form open with its values if saving fails
+    const saved = await window.healthAssistant.updateHealthMetrics(healthData);
+    if (!saved) return;
 
-        window.healthAssistant.showToast('Health data saved successfully!', 'success');
-    } catch (error) {
-        console.error('Error updating health metrics:', error);
-    }
+    closeHealthModal();
+    document.getElementById('healthForm').reset();
+    window.dashboardMotion.celebrateSave(formBox);
+    await loadDashboardData();
 }
 
 // ========================
@@ -672,24 +687,4 @@ function formatTime(dateStr) {
         hour: '2-digit',
         minute: '2-digit'
     });
-}
-
-function animateValue(element, start, end, duration) {
-    const startTime = performance.now();
-    const endVal = parseInt(end);
-    const startVal = parseInt(start);
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-        const current = Math.round(startVal + (endVal - startVal) * eased);
-        element.textContent = current;
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-
-    requestAnimationFrame(update);
 }
